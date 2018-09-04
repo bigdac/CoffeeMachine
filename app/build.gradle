@@ -1,0 +1,60 @@
+apply plugin: 'com.android.application'
+apply plugin: 'org.greenrobot.greendao'
+
+
+greendao {
+    schemaVersion 21
+    daoPackage 'com.xr.database.dao'
+    targetGenDir 'src/main/java'
+}
+android {
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
+    defaultConfig {
+        applicationId "vendingmachine.xr.com.coffeemachine"
+        minSdkVersion 17
+        targetSdkVersion 27
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            moduleName "serial_port"         //生成的so名字
+            abiFilters "armeabi", "armeabi-v7a", "x86"  //输出指定三种abi体系结构下的so库。
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+        sourceSets.main {
+            jni.srcDirs = []
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.android.support.constraint:constraint-layout:1.1.2'
+    testImplementation 'junit:junit:4.12'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation('com.android.support.test.espresso:espresso-core:3.0.2', {
+        exclude group: 'com.android.support', module: 'support-annotations'
+    })
+    implementation files('libs/org.eclipse.paho.client.mqttv3-1.0.2.jar')
+    implementation files('libs/zxing.jar')
+    implementation 'com.android.support:support-v4:25.4.0'
+    implementation 'org.greenrobot:greendao:3.1.0'
+    implementation 'com.android.support:recyclerview-v7:27.0.2'
+    implementation 'com.github.donkingliang:GroupedRecyclerViewAdapter:1.2.0'
+    implementation 'com.jakewharton:butterknife:8.5.1'
+    annotationProcessor "com.jakewharton:butterknife-compiler:8.6.0"
+    implementation 'com.github.bumptech.glide:glide:3.7.0'
+    implementation 'com.youth.banner:banner:1.4.9'
+    implementation project(':vitamio')
+    implementation files('libs/shoushuotts.jar')
+    implementation files('libs/Msc.jar')
+    implementation files('libs/Sunflower.jar')
+}
