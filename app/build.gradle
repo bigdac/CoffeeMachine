@@ -3,19 +3,29 @@ apply plugin: 'org.greenrobot.greendao'
 
 
 greendao {
-    schemaVersion 21
+    schemaVersion 24
     daoPackage 'com.xr.database.dao'
     targetGenDir 'src/main/java'
 }
 android {
+    signingConfigs {
+        config {
+            keyAlias 'key0'
+            keyPassword '123456'
+            storeFile file('F:/project/CoffeeMachine/CoffeeMachine/coffe.jks')
+            storePassword '123456'
+        }
+
+    }
+
     compileSdkVersion 27
     buildToolsVersion '27.0.3'
     defaultConfig {
         applicationId "vendingmachine.xr.com.coffeemachine"
         minSdkVersion 17
-        targetSdkVersion 27
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 23
+        versionCode 2
+        versionName "2.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -27,9 +37,13 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.config
         }
         sourceSets.main {
             jni.srcDirs = []
+        }
+        debug {
+            signingConfig signingConfigs.config
         }
     }
 }
@@ -44,7 +58,6 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     implementation files('libs/org.eclipse.paho.client.mqttv3-1.0.2.jar')
-    implementation files('libs/zxing.jar')
     implementation 'com.android.support:support-v4:25.4.0'
     implementation 'org.greenrobot:greendao:3.1.0'
     implementation 'com.android.support:recyclerview-v7:27.0.2'
@@ -53,8 +66,22 @@ dependencies {
     annotationProcessor "com.jakewharton:butterknife-compiler:8.6.0"
     implementation 'com.github.bumptech.glide:glide:3.7.0'
     implementation 'com.youth.banner:banner:1.4.9'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.2'
     implementation project(':vitamio')
     implementation files('libs/shoushuotts.jar')
     implementation files('libs/Msc.jar')
     implementation files('libs/Sunflower.jar')
+    implementation files('libs/AMap_Location_V3.8.0_20180201.jar')
+    implementation files('libs/Android_Map3D_SDK_V6.0.0_20180211.jar')
+    implementation files('libs/BaiduLBS_Android.jar')
+    implementation 'com.contrarywind:Android-PickerView:4.1.6'
+    implementation 'com.squareup.okhttp3:okhttp:3.4.1'
+    implementation 'com.zhy:okhttputils:2.0.0'
+    implementation 'com.alibaba:fastjson:1.2.10'
+    implementation 'com.google.code.gson:gson:2.8.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.1.0'
+    implementation 'org.greenrobot:eventbus:3.0.0'
+    implementation files('libs/zxing.jar')
+
 }

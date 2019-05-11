@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp">
+    <TextView
+        android:id="@+id/tv_bz1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="商品名："
+        android:layout_centerVertical="true"
+        android:layout_marginLeft="20dp"
+        android:textColor="@color/black"
+        />
+    <TextView
+        android:id="@+id/tv_list_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="西洋参"
+        android:layout_centerVertical="true"
+        android:layout_toRightOf="@+id/tv_bz1"
+        android:layout_marginLeft="20dp"
+        android:textColor="@color/color_black3"
+        />
+    <Button
+        android:id="@+id/bt_list_add"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginRight="25dp"
+        android:textSize="15dp"
+        android:text="添加货物"
+        android:layout_margin="3dp"
+        />
+
+</RelativeLayout>

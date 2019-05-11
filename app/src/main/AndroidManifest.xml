@@ -7,12 +7,22 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <!-- 这个权限用于获取wifi的获取权限，wifi信息会用来进行网络定位 -->
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
-
+    <!-- 这个权限用于读取imei码 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- 用于访问GPS定位 -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!-- 用于提高GPS定位速度 -->
+    <uses-permission android:name="android.permission.ACCESS_LOCATION_EXTRA_COMMANDS" />
     <!-- 请求网络 -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission
         android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+
+
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,10 +31,16 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar"
         android:name=".application.MyApplication"
+        android:hardwareAccelerated="true"
         >
-        <activity android:name=".activity.FirstActivity"
+        <meta-data
+            android:name="com.baidu.lbsapi.API_KEY"
+            android:value="TGVPGFUP2ogcHA4hjN6D0RF7TTh8faTF" />
+
+        <activity android:name=".activity.StartupPageActivity"
+            android:configChanges="keyboardHidden|orientation|mcc|mnc"
             android:screenOrientation="portrait">
-            <!--android:configChanges="keyboardHidden|orientation|mcc|mnc"-->
+
 
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,13 +48,35 @@
                 <!--<category android:name="android.intent.category.HOME" />-->
                 <!--<category android:name="android.intent.category.DEFAULT" />-->
             </intent-filter>
+
         </activity>
+        <receiver
+            android:name=".mqtt.MyReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter android:priority="1000">
+                <action android:name="android.intent.action.BOOT_COMPLETED"></action>
+            </intent-filter>
+        </receiver>
+
         <activity
             android:name="io.vov.vitamio.activity.InitActivity"
             android:configChanges="orientation|screenSize|smallestScreenSize|keyboard|keyboardHidden|navigation"
             android:launchMode="singleTop"
             android:theme="@android:style/Theme.NoTitleBar"
             android:windowSoftInputMode="stateAlwaysHidden" />
+
+
+        <activity android:name=".activity.TestActivity"
+            android:screenOrientation="portrait"
+            />
+        <activity android:name=".activity.DownloadActivity" />
+        <activity android:name=".activity.CoffeeTestActivity" />
+        <activity android:name=".activity.SaleActivity" />
+        <activity android:name=".activity.AddGoodsActivity" />
+        <activity android:name=".activity.ChangePriceActivity" />
+        <activity android:name=".activity.FirstActivity" />
+
         <service
             android:name=".mqtt.MQService"
             android:enabled="true"
@@ -52,6 +90,15 @@
                 <action android:name="android.net.conn.CONNECTIVITY_CHANGE" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".mqtt.UpdateReceiver">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_REPLACED"/>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <action android:name="android.intent.action.PACKAGE_REMOVED" />
+                <data android:scheme="package"/>
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>

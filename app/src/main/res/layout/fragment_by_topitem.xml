@@ -1,23 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="265dp"
-    android:layout_height="250dp">
+    android:layout_height="320dp"
+    android:padding="15dp"
+    android:paddingBottom="20dp"
+    >
   <RelativeLayout
       android:id="@+id/rl_top1"
-      android:layout_centerInParent="true"
-      android:layout_width="wrap_content"
-      android:background="#000000"
-      android:layout_height="wrap_content">
+      android:layout_width="match_parent"
+      android:background="#FFFFFF"
+      android:layout_height="match_parent">
 
     <ImageView
         android:id="@+id/iv_goods_pic"
+        android:layout_marginTop="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
+        android:src="@mipmap/buy_fail"
         android:scaleType="centerInside"
-        android:src="@mipmap/iimg" />
-    <RelativeLayout
+      />
+   <!-- <RelativeLayout
         android:id="@+id/rl_goodscheck"
 
         android:layout_width="100dp"
@@ -37,19 +39,30 @@
         android:layout_marginBottom="10dp"
 
         />
-    </RelativeLayout>
+    </RelativeLayout>-->
+    <TextView
+        android:id="@+id/tv_buy_bh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="等待补货"
+        android:layout_alignRight="@+id/iv_goods_pic"
+        android:layout_marginTop="-10dp"
+        android:layout_alignTop="@id/tv_goods_name"
+        android:textColor="#ff5932"
+        android:textSize="25sp"
+        android:visibility="gone"
+
+        />
     <TextView
         android:id="@+id/tv_goods_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="葛藤独醒茶"
-        android:ems="4"
-        android:gravity="center"
         android:textSize="20sp"
         android:layout_marginLeft="10dp"
-        android:layout_marginBottom="15dp"
+        android:layout_marginBottom="25dp"
         android:layout_alignLeft="@+id/iv_goods_pic"
-        android:layout_alignBottom="@+id/iv_goods_pic"
+        android:layout_alignParentBottom="true"
         android:textColor="@color/color_black"
         />
     <TextView
@@ -58,22 +71,23 @@
         android:layout_height="wrap_content"
         android:text="30"
         android:textSize="25sp"
-        android:layout_marginTop="35dp"
-        android:layout_marginLeft="5dp"
-        android:layout_toRightOf="@+id/tv_goods_name"
-        android:layout_alignTop="@+id/rl_goodscheck"
+        android:layout_toLeftOf="@+id/tv_bz1"
+        android:layout_marginRight="2dp"
+         android:layout_alignTop="@id/tv_goods_name"
         android:textColor="#ff5932"
         />
-    <TextView
 
+    <TextView
+        android:id="@+id/tv_bz1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/tv_buy_price"
+        android:paddingTop="15dp"
+        android:layout_marginRight="10dp"
         android:text="￥"
-        android:textSize="20sp"
-        android:layout_toRightOf="@+id/tv_buy_price"
-        android:layout_alignBottom="@+id/rl_goodscheck"
         android:textColor="#ff5932"
-        />
+        android:textSize="20sp" />
   </RelativeLayout>
   <TextView
       android:layout_width="wrap_content"

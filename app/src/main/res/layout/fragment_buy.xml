@@ -14,27 +14,45 @@
         >
 
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="5"
-        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="13"
 
-  <android.support.v7.widget.RecyclerView
+            >
+            <!--android:layout_marginTop="100dp"-->
+            <android.support.v7.widget.RecyclerView
 
-        android:layout_gravity="center"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/grid"
-        />
-    </RelativeLayout>
+                android:id="@+id/grid"
 
-       <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_centerHorizontal="true"
+                android:overScrollMode="never"
+                android:layout_gravity="center" />
+
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            >
+        <TextView
+            android:id="@+id/tv_buy_mes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="正在加热中，请稍候。。。"
+            android:textColor="@color/black"
+             android:layout_centerVertical="true"
+            android:layout_marginLeft="20dp"
+            android:textSize="30dp"
+            />
+        </RelativeLayout>
+       <!--<LinearLayout
          android:layout_width="match_parent"
          android:layout_height="0dp"
          android:layout_weight="1"
-         >
+         >（保留以后再做上个weight是5）
 
 
            <android.support.v7.widget.RecyclerView
@@ -58,7 +76,7 @@
                android:layout_marginRight="40dp"
                />
 
-       </LinearLayout>
+       </LinearLayout>-->
 
     </LinearLayout>
     <LinearLayout
@@ -70,12 +88,14 @@
         >
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_gravity="center"
+            android:gravity="center"
+            >
         <ImageView
             android:id="@+id/iv_xq_pic"
             android:layout_width="350dp"
             android:layout_height="350dp"
-            android:src="@mipmap/xq_1"
             android:layout_marginLeft="20dp"
             android:layout_marginTop="20dp"
             />
@@ -160,7 +180,7 @@
             android:layout_marginLeft="20dp"
 
             />
-            <LinearLayout
+           <!-- <LinearLayout
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -197,9 +217,9 @@
                     android:layout_weight="1"
                     android:src="@mipmap/xq_add"
                     />
-            </LinearLayout>
+            </LinearLayout>-->
         <LinearLayout
-            android:id="@id/li_xq_bt"
+            android:id="@+id/li_xq_bt"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"

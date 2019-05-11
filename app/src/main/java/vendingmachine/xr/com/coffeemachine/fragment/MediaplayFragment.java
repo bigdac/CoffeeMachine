@@ -31,13 +31,15 @@ import static android.content.Context.MODE_PRIVATE;
 public class MediaplayFragment extends Fragment {
     View view;
     VideoView mVideoView;
+//    MediaPlayer mVideoView;
     private CustomMediaController mCustomMediaController;
     MediaController mController;
 
-    Uri uri;
+    Uri uri1;
+
     String [] url;
     String [] url1;
-    int l = -1;
+    int l = 0;
     SharedPreferences preferences;
     @Nullable
     @Override
@@ -53,30 +55,32 @@ public class MediaplayFragment extends Fragment {
         //设置当前窗体为全屏显示
         window.setFlags(flag, flag);
 
-       String videourl =((FirstActivity)getActivity()).getVideourl();
-        if (videourl!=null){
-            String [] arr= videourl.split(",");
-
-            if (arr.length==1){
-                url1= new String[]{videourl};
-            }else {
-                url1=arr;
-
-            }
-
-        }
+//       String videourl =((FirstActivity)getActivity()).getVideourl();
+//        if (videourl!=null){
+//            String [] arr= videourl.split(",");
+//
+//            if (arr.length==1){
+//                url1= new String[]{videourl};
+//            }else {
+//                url1=arr;
+//
+//            }
+//
+//        }
 
         //检查vitamio框架是否可用
 
         mVideoView = (VideoView) view.findViewById(R.id.video);
-//        String videoUrl1 = "mnt/sdcard/102.mp4" ;
+        String videoUrl1 = "mnt/sdcard/105.mp4" ;
+        String videoUrl2 = "mnt/sdcard/103.mp4" ;
+//        String videoUrl1 = "/storage/emulated/0/123.mp4" ;
 //        Log.e("path", "onCreateView: "+videoUrl1 );
 //        String videoUrl1 = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" ;
 //        String videoUrl2 = "http://pde49x7hh.bkt.clouddn.com/abc.mp4" ;
 
 //         url = new String[]{videoUrl1,videoUrl1};
 
-//         uri = Uri.parse( videoUrl2 );
+         uri1 = Uri.parse( videoUrl2 );
 
         MediaController mediaController = new MediaController(getActivity());
         mediaController.setVisibility(View.GONE);
@@ -98,16 +102,19 @@ public class MediaplayFragment extends Fragment {
 //            }
 //        });
         if (Vitamio.isInitialized(getActivity())) {
-            mVideoView.setVideoURI(Uri.parse(url1[0]));
+//            mVideoView.setVideoURI(Uri.parse(url1[0]));
+            mVideoView.setVideoURI(uri1);
             mVideoView.setVideoQuality(MediaPlayer.VIDEOQUALITY_HIGH);
             mVideoView.setMediaController(mCustomMediaController);
             mVideoView.setBufferSize(10240); //设置视频缓冲大小
+
             mVideoView.requestFocus();
             mVideoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
                     // optional need Vitamio 4.0
                     Log.e("first", "onPrepared:... " );
+
                     mediaPlayer.setPlaybackSpeed(1.0f);
 
 
@@ -120,15 +127,18 @@ public class MediaplayFragment extends Fragment {
                 @Override
                 public void onCompletion(MediaPlayer mp) {
 
-                      l++;
-                    if (l<url1.length){
-                        mVideoView.setVideoURI(Uri.parse(url1[l]));
+//                      l++;
+//                    if (l<url1.length){
+//                        mVideoView.setVideoURI(Uri.parse(url1[l]));
+//                        mVideoView.start();
+//                    }else if (l>=url1.length){
+//                        l=0;
+//                        mVideoView.setVideoURI(Uri.parse(url1[l]));
+
+                        mVideoView.stopPlayback();
+                        mVideoView.setVideoURI(uri1);
                         mVideoView.start();
-                    }else if (l>=url1.length){
-                        l=0;
-                        mVideoView.setVideoURI(Uri.parse(url1[l]));
-                        mVideoView.start();
-                    }
+
 
                 }
             });
@@ -176,6 +186,24 @@ public class MediaplayFragment extends Fragment {
         }
     }
 
+
+//    //声明及实现接口的方法
+//    private FirstActivity.MyOnClick myOnClick = new FirstActivity.MyOnClick() {
+//        @Override
+//        public void myListener(int what) {
+//            switch (what){
+//
+//                case 0:
+//                        mVideoView.pause();
+//                    break;
+//
+//                case 1:
+//                        mVideoView.start();
+//                    break;
+//            }
+//        }
+//
+//    };
     public void setStopplay(){
         mVideoView.pause();
     }

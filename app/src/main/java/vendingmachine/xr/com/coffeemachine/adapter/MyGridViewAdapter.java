@@ -21,21 +21,21 @@ public class MyGridViewAdapter extends BaseAdapter {
     Boolean boo[] = {false, false, false, false, false,false, false, false};
 
     int first = 1 ;
-    int imgsid[] = {R.mipmap.img1,R.mipmap.img2,R.mipmap.img3,R.mipmap.img4,R.mipmap.img5
-    ,R.mipmap.img6,R.mipmap.img7,R.mipmap.img8};
+
     public MyGridViewAdapter(Context context) {
         this.context = context;
         isCheck = false;
     }
 
+
     @Override
     public int getCount() {
-        return imgsid.length;
+        return 0;
     }
 
     @Override
     public Object getItem(int position) {
-        return imgsid[position];
+        return null;
     }
 
     @Override
@@ -56,7 +56,6 @@ public class MyGridViewAdapter extends BaseAdapter {
             imageView = (ImageView) convertView;
         }
 
-            imageView.setImageDrawable(makeBmp(imgsid[position], boo[position]));
 
 
 

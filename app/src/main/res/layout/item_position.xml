@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="50dp">
+    <TextView
+        android:id="@+id/tv_hd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:textSize="20dp"
+        android:text="货道："
+        android:layout_marginLeft="50dp"
+        />
+    <TextView
+        android:id="@+id/tv_hp"
+        android:layout_toRightOf="@+id/tv_hd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:textSize="20dp"
+        android:text="货道："
+        android:layout_marginLeft="70dp"
+        />
+    <Button
+        android:id="@+id/bt_del"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="删除"
+        android:layout_alignParentRight="true"
+        android:layout_centerVertical="true"
+        android:layout_marginRight="50dp"
+        />
+
+</RelativeLayout>

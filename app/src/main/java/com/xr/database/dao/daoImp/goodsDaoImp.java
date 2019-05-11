@@ -2,14 +2,11 @@ package com.xr.database.dao.daoImp;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-
 import com.xr.database.dao.DBManager;
 import com.xr.database.dao.DaoMaster;
 import com.xr.database.dao.DaoSession;
 import com.xr.database.dao.goodsDao;
-
 import java.util.List;
-
 import vendingmachine.xr.com.coffeemachine.pojo.goods;
 
 public class goodsDaoImp {

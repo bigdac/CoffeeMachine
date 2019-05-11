@@ -1,5 +1,6 @@
 package vendingmachine.xr.com.coffeemachine.adapter;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -31,10 +33,8 @@ public class MygoodsAdpter  extends RecyclerView.Adapter<MyViewHolder> {
     private goods goods ;
     int i = 1;
     private int mPosition = -1;
-    int imgsid[] = {R.mipmap.img2,R.mipmap.img4,R.mipmap.img5,R.mipmap.img6,R.mipmap.img3
-            ,R.mipmap.img1,R.mipmap.img4,R.mipmap.img8};
-    int imgsidxq[] = {R.mipmap.xq_4,R.mipmap.xq_1,R.mipmap.xq_2,R.mipmap.xq_7,R.mipmap.xq_5
-            ,R.mipmap.xq_3,R.mipmap.xq_8,R.mipmap.xq_6};
+
+    int hasgood=-1;
     //创建构造参数
     public MygoodsAdpter(Context context , List<goods> datas){
         this.mContext = context;
@@ -67,43 +67,58 @@ public class MygoodsAdpter  extends RecyclerView.Adapter<MyViewHolder> {
         String url=good.getListPic();
         Glide.with(mContext).load(url)
                 .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-               .override(200,200)
+               .override(200,202)
                 .into( holder.iv_goods);
-        holder.tv_price.setText(String.valueOf((int)mDatas.get(position).getPrice()));
-
-
-
+        holder.tv_price.setText(String.valueOf( mDatas.get(position).getPrice()));
         final boolean []open =new boolean[] {false} ;
 
-        holder.rl_goodscheck.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-                if (open[0]) {
-                    holder.iv_cheeks.setImageResource(R.mipmap.imgno);
-                    open[0] = false;
-                    sign[position]=0;
-                    ((FirstActivity)mContext).myClick(position);
-                    ((FirstActivity)mContext).myClick2(position,0);
-                } else {
-                    open [0]= true;
-                    sign[position]=1;
-                    holder.iv_cheeks.setImageResource(R.mipmap.imgdh);
-                    Log.e("good", "onClick: -->"+good.getPosition() );
-                    ((FirstActivity)mContext).myClick(position);
-                    ((FirstActivity)mContext).myClick2(position,1);
+//        holder.rl_goodscheck.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//
+//                if (open[0]) {
+//                    holder.iv_cheeks.setImageResource(R.mipmap.imgno);
+//                    open[0] = false;
+//                    sign[position]=0;
+//                    ((FirstActivity)mContext).myClick(position);
+//                    ((FirstActivity)mContext).myClick2(position,0);
+//                } else {
+//                    open [0]= true;
+//                    sign[position]=1;
+//                    holder.iv_cheeks.setImageResource(R.mipmap.imgdh);
+//                    Log.e("good", "onClick: -->"+good.getPosition() );
+//                    ((FirstActivity)mContext).myClick(position);
+//                    ((FirstActivity)mContext).myClick2(position,1);
+//                }
+//
+//            }
+//
+//        });
+        hasgood= mDatas.get(position).getHasGoods();
+        if (hasgood==0){
+            holder.tv_buy_bh.setVisibility(View.VISIBLE);
+            holder.tv_bz1.setVisibility(View.GONE);
+            holder.tv_buy_price.setVisibility(View.GONE);
+            holder.iv_goods.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Toast.makeText(mContext,"等待补货中。。。",Toast.LENGTH_SHORT).show();
                 }
-
-            }
-
-        });
-        holder.iv_goods.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                mPosition = position;
-                ((FirstActivity)mContext).myClick1();
+            });
+        }else {
+            holder.tv_buy_bh.setVisibility(View.GONE);
+            holder.tv_bz1.setVisibility(View.VISIBLE);
+            holder.tv_buy_price.setVisibility(View.VISIBLE);
+            holder.iv_goods.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mPosition = position;
+                    ((FirstActivity)mContext).myClick1();
+                    Log.e("PPPPPPPDDDDDD", "onClick: -->"+mPosition );
+                }
+            });
         }
-        });
+
     }
     @Override
     public int getItemCount() {
@@ -112,9 +127,7 @@ public class MygoodsAdpter  extends RecyclerView.Adapter<MyViewHolder> {
         return mDatas.size();
 
     }
-    public int  getImgsid(){
-        return imgsidxq[mPosition];
-    }
+
    public int getPosition (){
         return mPosition;
    }
@@ -143,19 +156,22 @@ public class MygoodsAdpter  extends RecyclerView.Adapter<MyViewHolder> {
 
 class MyViewHolder extends RecyclerView.ViewHolder  {
 
-    TextView tv_name,tv_price,tv_xq_number;
+    TextView tv_name,tv_price,tv_xq_number,tv_buy_bh,tv_buy_price,tv_bz1;
     ImageView iv_goods,iv_xq_add,iv_xq_reduce;
-    ImageView iv_cheeks;
-    RelativeLayout rl_goodscheck;
+//    ImageView iv_cheeks;
+//    RelativeLayout rl_goodscheck;
+    @SuppressLint("CutPasteId")
     public MyViewHolder(View itemView) {
         super(itemView);
 
         tv_name = (TextView) itemView.findViewById(R.id.tv_goods_name);
         iv_goods= (ImageView) itemView.findViewById(R.id.iv_goods_pic);
-        iv_cheeks = (ImageView) itemView.findViewById(R.id.iv_goods_check);
+//        iv_cheeks = (ImageView) itemView.findViewById(R.id.iv_goods_check);
         tv_price= (TextView) itemView.findViewById(R.id.tv_buy_price);
-        rl_goodscheck=(RelativeLayout)itemView.findViewById(R.id.rl_goodscheck);
-
+//        rl_goodscheck=(RelativeLayout)itemView.findViewById(R.id.rl_goodscheck);
+        tv_buy_bh = (TextView) itemView.findViewById(R.id.tv_buy_bh);
+        tv_buy_price = itemView.findViewById(R.id.tv_buy_price);
+        tv_bz1 = itemView.findViewById(R.id.tv_bz1);
     }
 
 

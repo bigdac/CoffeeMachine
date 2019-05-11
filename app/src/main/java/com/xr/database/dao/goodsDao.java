@@ -25,15 +25,19 @@ public class goodsDao extends AbstractDao<goods, Long> {
      */
     public static class Properties {
         public final static Property GoodsId = new Property(0, long.class, "goodsId", true, "_id");
-        public final static Property Price = new Property(1, float.class, "price", false, "PRICE");
+        public final static Property Price = new Property(1, double.class, "price", false, "PRICE");
         public final static Property Number = new Property(2, int.class, "number", false, "NUMBER");
         public final static Property Formulation = new Property(3, String.class, "formulation", false, "FORMULATION");
         public final static Property Efficiency = new Property(4, String.class, "efficiency", false, "EFFICIENCY");
         public final static Property ListPic = new Property(5, String.class, "listPic", false, "LIST_PIC");
         public final static Property DetailPic = new Property(6, String.class, "detailPic", false, "DETAIL_PIC");
         public final static Property GoodsName = new Property(7, String.class, "goodsName", false, "GOODS_NAME");
-        public final static Property Position = new Property(8, int.class, "position", false, "POSITION");
-        public final static Property Val = new Property(9, int.class, "val", false, "VAL");
+        public final static Property Val = new Property(8, int.class, "val", false, "VAL");
+        public final static Property Hd = new Property(9, String.class, "hd", false, "HD");
+        public final static Property Hp = new Property(10, String.class, "hp", false, "HP");
+        public final static Property HasGoods = new Property(11, int.class, "hasGoods", false, "HAS_GOODS");
+        public final static Property WaterQuantity = new Property(12, int.class, "waterQuantity", false, "WATER_QUANTITY");
+        public final static Property Temperature = new Property(13, int.class, "temperature", false, "TEMPERATURE");
     }
 
 
@@ -57,8 +61,12 @@ public class goodsDao extends AbstractDao<goods, Long> {
                 "\"LIST_PIC\" TEXT," + // 5: listPic
                 "\"DETAIL_PIC\" TEXT," + // 6: detailPic
                 "\"GOODS_NAME\" TEXT," + // 7: goodsName
-                "\"POSITION\" INTEGER NOT NULL ," + // 8: position
-                "\"VAL\" INTEGER NOT NULL );"); // 9: val
+                "\"VAL\" INTEGER NOT NULL ," + // 8: val
+                "\"HD\" TEXT," + // 9: hd
+                "\"HP\" TEXT," + // 10: hp
+                "\"HAS_GOODS\" INTEGER NOT NULL ," + // 11: hasGoods
+                "\"WATER_QUANTITY\" INTEGER NOT NULL ," + // 12: waterQuantity
+                "\"TEMPERATURE\" INTEGER NOT NULL );"); // 13: temperature
     }
 
     /** Drops the underlying database table. */
@@ -98,8 +106,20 @@ public class goodsDao extends AbstractDao<goods, Long> {
         if (goodsName != null) {
             stmt.bindString(8, goodsName);
         }
-        stmt.bindLong(9, entity.getPosition());
-        stmt.bindLong(10, entity.getVal());
+        stmt.bindLong(9, entity.getVal());
+ 
+        String hd = entity.getHd();
+        if (hd != null) {
+            stmt.bindString(10, hd);
+        }
+ 
+        String hp = entity.getHp();
+        if (hp != null) {
+            stmt.bindString(11, hp);
+        }
+        stmt.bindLong(12, entity.getHasGoods());
+        stmt.bindLong(13, entity.getWaterQuantity());
+        stmt.bindLong(14, entity.getTemperature());
     }
 
     @Override
@@ -133,8 +153,20 @@ public class goodsDao extends AbstractDao<goods, Long> {
         if (goodsName != null) {
             stmt.bindString(8, goodsName);
         }
-        stmt.bindLong(9, entity.getPosition());
-        stmt.bindLong(10, entity.getVal());
+        stmt.bindLong(9, entity.getVal());
+ 
+        String hd = entity.getHd();
+        if (hd != null) {
+            stmt.bindString(10, hd);
+        }
+ 
+        String hp = entity.getHp();
+        if (hp != null) {
+            stmt.bindString(11, hp);
+        }
+        stmt.bindLong(12, entity.getHasGoods());
+        stmt.bindLong(13, entity.getWaterQuantity());
+        stmt.bindLong(14, entity.getTemperature());
     }
 
     @Override
@@ -146,15 +178,19 @@ public class goodsDao extends AbstractDao<goods, Long> {
     public goods readEntity(Cursor cursor, int offset) {
         goods entity = new goods( //
             cursor.getLong(offset + 0), // goodsId
-            cursor.getFloat(offset + 1), // price
+            cursor.getDouble(offset + 1), // price
             cursor.getInt(offset + 2), // number
             cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3), // formulation
             cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4), // efficiency
             cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5), // listPic
             cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6), // detailPic
             cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7), // goodsName
-            cursor.getInt(offset + 8), // position
-            cursor.getInt(offset + 9) // val
+            cursor.getInt(offset + 8), // val
+            cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9), // hd
+            cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10), // hp
+            cursor.getInt(offset + 11), // hasGoods
+            cursor.getInt(offset + 12), // waterQuantity
+            cursor.getInt(offset + 13) // temperature
         );
         return entity;
     }
@@ -162,15 +198,19 @@ public class goodsDao extends AbstractDao<goods, Long> {
     @Override
     public void readEntity(Cursor cursor, goods entity, int offset) {
         entity.setGoodsId(cursor.getLong(offset + 0));
-        entity.setPrice(cursor.getFloat(offset + 1));
+        entity.setPrice(cursor.getDouble(offset + 1));
         entity.setNumber(cursor.getInt(offset + 2));
         entity.setFormulation(cursor.isNull(offset + 3) ? null : cursor.getString(offset + 3));
         entity.setEfficiency(cursor.isNull(offset + 4) ? null : cursor.getString(offset + 4));
         entity.setListPic(cursor.isNull(offset + 5) ? null : cursor.getString(offset + 5));
         entity.setDetailPic(cursor.isNull(offset + 6) ? null : cursor.getString(offset + 6));
         entity.setGoodsName(cursor.isNull(offset + 7) ? null : cursor.getString(offset + 7));
-        entity.setPosition(cursor.getInt(offset + 8));
-        entity.setVal(cursor.getInt(offset + 9));
+        entity.setVal(cursor.getInt(offset + 8));
+        entity.setHd(cursor.isNull(offset + 9) ? null : cursor.getString(offset + 9));
+        entity.setHp(cursor.isNull(offset + 10) ? null : cursor.getString(offset + 10));
+        entity.setHasGoods(cursor.getInt(offset + 11));
+        entity.setWaterQuantity(cursor.getInt(offset + 12));
+        entity.setTemperature(cursor.getInt(offset + 13));
      }
     
     @Override

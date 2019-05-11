@@ -29,8 +29,8 @@ public class AryChangeManager {
     public static int[] stringToHex(String data){
         data = data.toLowerCase();
         data = data.replace(" ","");
-        Log.i("TAG","data="+data);
-        Log.i("TAG","data.length="+data.length());
+//        Log.i("TAG","data="+data);
+//        Log.i("TAG","data.length="+data.length());
         int[] buf;
         if(data.length()%2==0){
             buf = new int[data.length()/2];
@@ -49,10 +49,10 @@ public class AryChangeManager {
             int n2 = charToHex(c2);
 
             buf[j] = 16*n1+n2;
-            Log.i("TAG","c1="+c1+" c2="+c2);
+//            Log.i("TAG","c1="+c1+" c2="+c2);
         }
         for(int k:buf){
-            Log.i("TAG","k="+k);
+//            Log.i("TAG","k="+k);
         }
         return buf;
     }
@@ -83,6 +83,27 @@ public class AryChangeManager {
             case 'f':n = 0XF;break;
         }
         return n;
+    }
+
+
+
+    public static String str2HexStr(String str)
+    {
+
+        char[] chars = "0123456789ABCDEF".toCharArray();
+        StringBuilder sb = new StringBuilder("");
+        byte[] bs = str.getBytes();
+        int bit;
+
+        for (int i = 0; i < bs.length; i++)
+        {
+            bit = (bs[i] & 0x0f0) >> 4;
+            sb.append(chars[bit]);
+            bit = bs[i] & 0x0f;
+            sb.append(chars[bit]);
+            sb.append(' ');
+        }
+        return sb.toString().trim();
     }
 
     /**
@@ -127,5 +148,6 @@ public class AryChangeManager {
         }
         return builder.toString();
     }
+
 
 }

@@ -1,27 +1,15 @@
 package vendingmachine.xr.com.coffeemachine.adapter;
 
-import android.app.Activity;
-import android.content.ComponentName;
+
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.graphics.drawable.ColorDrawable;
-import android.os.IBinder;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
-
-
-
-import java.util.ArrayList;
 import java.util.List;
-
-import butterknife.OnClick;
 import vendingmachine.xr.com.coffeemachine.R;
 import vendingmachine.xr.com.coffeemachine.activity.FirstActivity;
 import vendingmachine.xr.com.coffeemachine.pojo.goods;
@@ -96,9 +84,8 @@ public class ChoosecoffeAdapter extends RecyclerView.Adapter<ChoosecoffeAdapter.
                  int val=data.get(position).getVal();
                 val++;
                 data.get(position).setVal(val);
-
                 holder.tv_number.setText(String.valueOf(val));
-                 ((FirstActivity)context).myClick2(position,val);
+                ((FirstActivity)context).myClick2(position,val);
              }
          });
         holder.img_reduce.setOnClickListener(new View.OnClickListener() {

@@ -6,12 +6,8 @@ import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.util.Log;
-
-
-import java.util.List;
-
 import vendingmachine.xr.com.coffeemachine.application.MyApplication;
-import vendingmachine.xr.com.coffeemachine.http.NetWorkUtil;
+import vendingmachine.xr.com.coffeemachine.utils.NetWorkUtil;
 import vendingmachine.xr.com.coffeemachine.utils.Utils;
 
 public class MQTTMessageReveiver extends BroadcastReceiver {

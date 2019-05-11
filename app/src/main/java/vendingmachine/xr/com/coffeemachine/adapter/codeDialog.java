@@ -5,29 +5,13 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.annotation.NonNull;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-
-import com.bumptech.glide.Glide;
-
-import java.util.Timer;
-import java.util.TimerTask;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.OnClick;
 import vendingmachine.xr.com.coffeemachine.R;
-import vendingmachine.xr.com.coffeemachine.fragment.BuyFragment;
 import vendingmachine.xr.com.coffeemachine.utils.ZXingUtils;
 
 /**
@@ -35,7 +19,7 @@ import vendingmachine.xr.com.coffeemachine.utils.ZXingUtils;
  */
 
 /**
- * 创建新家
+ *
  */
 public class codeDialog extends Dialog {
 

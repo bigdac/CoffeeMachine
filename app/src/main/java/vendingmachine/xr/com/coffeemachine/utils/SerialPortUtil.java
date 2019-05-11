@@ -6,13 +6,18 @@ import android.os.Message;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import android_serialport_api.SerialPort;
+import vendingmachine.xr.com.coffeemachine.activity.CoffeeTestActivity;
+import vendingmachine.xr.com.coffeemachine.activity.FirstActivity;
 import vendingmachine.xr.com.coffeemachine.activity.MainActivity;
+import vendingmachine.xr.com.coffeemachine.activity.TestActivity;
 import vendingmachine.xr.com.coffeemachine.application.MyApplication;
 import vendingmachine.xr.com.coffeemachine.fragment.BuyFragment;
 
@@ -35,13 +40,19 @@ public class SerialPortUtil {
      */
     public static void openSerialPort(Context context, String port, int baudRate, int dataBits, int stopBits, char parity) throws IOException {
         Log.i("test","打开串口");
-        File file = new File("/dev/"+ port);
-        serialPort = new SerialPort(file,baudRate,dataBits,stopBits,parity);
-        //获取打开的串口0中的输入输出流，以便于串口数据的收发
-        inputStream = serialPort.getInputStream();
-        outputStream = serialPort.getOutputStream();
-        flag = true;
-        receiveSerialPort(context);
+        try {
+            File file = new File("/dev/"+ port);
+            serialPort = new SerialPort(file,baudRate,dataBits,stopBits,parity);
+            //获取打开的串口0中的输入输出流，以便于串口数据的收发
+            inputStream = serialPort.getInputStream();
+            outputStream = serialPort.getOutputStream();
+            flag = true;
+            receiveSerialPort(context);
+        } catch (SecurityException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -81,7 +92,7 @@ public class SerialPortUtil {
 //            byte[] buf = new byte[2];
 //            buf[0]=0x01;
 //            buf[1]=0x02;
-            Log.e("sent","hex发送串口数据-->"+buf);
+            Log.e("sent","hex发送串口数据-->"+buf.toString());
             outputStream.write(buf);
             outputStream.flush();
 
@@ -92,6 +103,46 @@ public class SerialPortUtil {
             e.printStackTrace();
         }
     }
+
+    /**
+     * 发送十六进制文件的方法
+     * @param data 要发送的数据
+     */
+    public static void sendFileSerialPort(File data){
+
+//        MyApplication.sendByte += data.length;
+
+        try {
+            //将16进制的int类型的数组转换为byte数组
+            FileInputStream fileInputStream = new FileInputStream(data);
+            byte[] buf = toByteArray(fileInputStream);
+            //将数据写入串口
+            Log.e("sent","hex发送串口数据-->"+buf.toString());
+            outputStream.write(buf);
+            outputStream.flush();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.i("test","串口数据发送失败");
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    /**
+     * 文件转byte数组
+     * @param in 要发送的数据
+     */
+    private static byte[] toByteArray(InputStream in) throws IOException {
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024 * 4];
+        int n = 0;
+        while ((n = in.read(buffer)) != -1) {
+            out.write(buffer, 0, n);
+        }
+        return out.toByteArray();
+    }
+
 
     /**
      * 发送文本串口数据的方法
@@ -115,9 +166,11 @@ public class SerialPortUtil {
         }
     }
 
+
     /**
      * 接收串口数据的方法
      */
+
     public static void receiveSerialPort(final Context context){
         Log.i("test","接收串口数据");
         /*定义一个handler对象要来接收子线程中接收到的数据
@@ -127,7 +180,7 @@ public class SerialPortUtil {
             @Override
             public void handleMessage(Message msg) {
                 if(msg.what==1){
-                    if(BuyFragment.isHexReceive&&values!=null){
+                    if(values!=null){
                         MyApplication.receiveByte += values.length;
 //                        MainActivity.refreshReceiveByte();
                         StringBuilder builder = new StringBuilder();
@@ -135,10 +188,19 @@ public class SerialPortUtil {
                             builder.append(AryChangeManager.dexToHex(i));
                             builder.append("");
                         }
+
 //                    Toast.makeText(context,"串口接收到数据："+builder.toString(),Toast.LENGTH_LONG).show();
-                        Log.i("test","接收串口数据"+builder.toString());
+//                        Log.i("test","接收串口数据"+builder.toString());
                         //对接收到的数据进行处理
-//                        MainActivity.refreshReceive(builder.toString());
+                        if (FirstActivity.running){
+                                FirstActivity.refreshReceive(builder.toString());
+                        }
+                        if (TestActivity.running){
+                            TestActivity.refreshReceive(builder.toString());
+                        }
+                        if (CoffeeTestActivity.running){
+                            CoffeeTestActivity.refreshReceive(builder.toString());
+                        }
                         values = null;
                     }else{
 //                        MainActivity.refreshReceive(serialData+" ");
@@ -159,6 +221,7 @@ public class SerialPortUtil {
                             return;
                         }
                         int size = inputStream.read(readData);
+
                         if (size>0&&flag) {
                             if(BuyFragment.isHexReceive){
                                 //当前为16进制接收
@@ -175,7 +238,7 @@ public class SerialPortUtil {
                         /*将接收到的数据封装进Message中，然后发送给主线程
                             */
                             handler.sendEmptyMessage(1);
-                            Thread.sleep(100);
+                            Thread.sleep(200);
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

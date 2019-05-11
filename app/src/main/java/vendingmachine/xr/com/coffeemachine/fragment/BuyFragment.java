@@ -1,18 +1,23 @@
 package vendingmachine.xr.com.coffeemachine.fragment;
 
 
+import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -32,37 +37,56 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.iflytek.cloud.SpeechConstant;
 import com.iflytek.cloud.SpeechSynthesizer;
+import com.xr.database.dao.daoImp.SaleGoodsDaoImp;
 import com.xr.database.dao.daoImp.goodsDaoImp;
+
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import pl.droidsonroids.gif.GifDrawable;
 import vendingmachine.xr.com.coffeemachine.R;
+import vendingmachine.xr.com.coffeemachine.activity.FirstActivity;
 import vendingmachine.xr.com.coffeemachine.adapter.ChoosecoffeAdapter;
 import vendingmachine.xr.com.coffeemachine.adapter.MygoodsAdpter;
 import vendingmachine.xr.com.coffeemachine.adapter.codeDialog;
+import vendingmachine.xr.com.coffeemachine.application.MyApplication;
 import vendingmachine.xr.com.coffeemachine.mqtt.MQService;
 import vendingmachine.xr.com.coffeemachine.mqtt.MQTTMessageReveiver;
 import vendingmachine.xr.com.coffeemachine.pojo.Order;
+import vendingmachine.xr.com.coffeemachine.pojo.SaleGoods;
 import vendingmachine.xr.com.coffeemachine.pojo.goods;
 import vendingmachine.xr.com.coffeemachine.utils.AryChangeManager;
+import vendingmachine.xr.com.coffeemachine.utils.NetWorkUtil;
 import vendingmachine.xr.com.coffeemachine.utils.SerialPortUtil;
+import vendingmachine.xr.com.coffeemachine.utils.Utils;
 
-public class BuyFragment extends Fragment{
+import static android.content.Context.DISPLAY_SERVICE;
+import static android.content.Context.MODE_PRIVATE;
+
+public class BuyFragment extends Fragment {
     View view;
     RecyclerView mRecycleView;//声明对象
     MygoodsAdpter adapter;//声明适配器
     RecyclerView recyclerView;
     goodsDaoImp goodsDaoImp;
+    SaleGoodsDaoImp saleGoodsDaoImp;
     goods good;
     ChoosecoffeAdapter choosecoffeAdapter;
     Unbinder unbinder;
@@ -87,22 +111,21 @@ public class BuyFragment extends Fragment{
     TextView tv_xq_price;
     @BindView(R.id.bt_buy_qx)
     Button bt_buy_qx;
-    @BindView(R.id.bt_buy)
-    Button bt_buy;
+    //    @BindView(R.id.bt_buy)
+//    Button bt_buy;
     @BindView(R.id.bt_buy_gm)
     Button bt_buy_gm;
     @BindView(R.id.iv_xq_pic)
     ImageView iv_xq_pic;
-    @BindView(R.id.iv_xq_add)
-    ImageView iv_xq_add;
-    @BindView(R.id.iv_xq_reduce)
-    ImageView iv_xq_reduce;
-    @BindView(R.id.tv_xq_number)
-    TextView tv_xq_number;
-    String[] name;
-    String[] effect;
-    String[] address;
-    String[] addressxq;
+    @BindView(R.id.tv_buy_mes)
+    TextView tv_buy_mes;
+    //    @BindView(R.id.iv_xq_add)
+//    ImageView iv_xq_add;
+//    @BindView(R.id.iv_xq_reduce)
+//    ImageView iv_xq_reduce;
+//    @BindView(R.id.tv_xq_number)
+//    TextView tv_xq_number;
+
     int i = 1;
     List<goods> list_goods;
     List<goods> newlist_goods;
@@ -121,55 +144,47 @@ public class BuyFragment extends Fragment{
     String command2 = "02";
     int x1 = AryChangeManager.stringToHex(machineType)[0];
     int x2 = AryChangeManager.stringToHex(machineAdress)[0];
+    int c1 = AryChangeManager.stringToHex(command1)[0];
     int c2 = AryChangeManager.stringToHex(command2)[0];
+    SharedPreferences preferences;
+    boolean CanBuy = false;
+    String szImei;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        name = new String[]{"西洋参", "姜紫红茶", "黑枸杞", "参精名仕", "洛神魅丽", "葛藤独醒茶", "普洱花子", "沉香凝神"};
-        effect = new String[]{"保护心血管系统；提高免疫力；促进血液活力；", "暖胃御寒，防治感冒。尔雅紫苏，香气迷人",
-                "滋补肾阴、清肝明目。增强免疫力，延缓衰老 改善睡眠，治疗近视", "滋补肾精、大补元气增强精子生长， 彰显男士活力",
-                "养颜瘦身，放松心情。", "千杯不怕，独自清醒", "降脂祛邪、润通轻盈。", "暖肾纳气，悠然自得"
-        };
-        address = new String[]{
-                "产地", "配方", "产地", "配方", "配方", "配方", "配方", "配方"
-        };
-        addressxq = new String[]{
-                "产地美国，真材实料。", "红茶、姜、紫苏、糖", "产地青海，真材实料。", "人参、玛咖、黄精、蛹虫草", "玫瑰茄、黑枸杞、玫瑰花、山楂、陈皮",
-                "藤茶、葛根、胎菊、甘草", "普洱、决明子、山楂、桂花", "沉香叶、老叶茶"
-        };
-        int[] price = new int[]{10, 10, 10, 10, 10, 10, 10, 10};
         goodsDaoImp = new goodsDaoImp(getActivity());
-
+        saleGoodsDaoImp = new SaleGoodsDaoImp(getActivity());
+        running = true;
         list_goods = new ArrayList<>();
         newlist_goods = new ArrayList<>();
-//        for (int i = 0; i < 8; i++) {
-//            goods good = new goods();
-//            good.setGoodsName(name[i]);
-//            good.setPrice(price[i]);
-//            good.setGoodsId(i);
-//            good.setNumber(1);
-//            good.setFormulation(addressxq[i]);
-//            good.setEfficiency(effect[i]);
-//            good.setVal(1);
-//            list_goods.add(good);
-//            newlist_goods.add(good);
-//        }
+        List<SaleGoods> saleGoods1=saleGoodsDaoImp.findAllgoods();
+        Log.i("saleGoods1","MMMMM__>"+saleGoods1);
+        for (int i =0 ;i<20;i++){
+            SaleGoods saleGoods = saleGoodsDaoImp.findById(i);
+            if (saleGoods!=null){
+                Long goodsId = saleGoods.getGoodsId();
+                if (goodsId!=null){
+                    goods goods = goodsDaoImp.findById(goodsId);
+                    goods good = new goods();
+                    good.setNumber(saleGoods.getGoodsNum());
+                    good.setHd(saleGoods.getHd());
+                    good.setHp(saleGoods.getHp());
+                    good.setTemperature(saleGoods.getTemperature());
+                    good.setWaterQuantity(saleGoods.getWaterQuantity());
+                    good.setPrice(goods.getPrice());
+                    Log.e("DDDDDDDSSSSSSS", "onCreate: "+goods.getPrice());
+                    good.setHasGoods(goods.getHasGoods());
+                    good.setDetailPic(goods.getDetailPic());
+                    good.setListPic(goods.getListPic());
+                    good.setEfficiency(goods.getEfficiency());
+                    good.setFormulation(goods.getFormulation());
+                    good.setGoodsName(goods.getGoodsName());
+                    list_goods.add(good);
+                    newlist_goods.add(good);
 
-        running = true;
-        if (  goodsDaoImp.findAllgoods().size()>0){
-            for (int i =0;i<goodsDaoImp.findAllgoods().size();i++){
-                goods good = goodsDaoImp.findAllgoods().get(i);
-                list_goods.add(good);
-                newlist_goods.add(good);
+                }
             }
-
-        }
-        try {
-            SerialPortUtil.openSerialPort(getActivity(), "ttyO3", 38400, 8, 1, 'N');
-
-        } catch (Exception e) {
-            e.printStackTrace();
         }
 
 
@@ -179,24 +194,21 @@ public class BuyFragment extends Fragment{
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_buy, container, false);
+        CanBuy =false;
         unbinder = ButterKnife.bind(this, view);
-
-
+        preferences = getActivity().getSharedPreferences("my", MODE_PRIVATE);
+        szImei = preferences.getString("szImei", "");
         mRecycleView = (RecyclerView) view.findViewById(R.id.grid);
-//        LinearLayoutManager linerLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
-//        mRecycleView.setLayoutManager(linerLayoutManager);
-        mRecycleView.setLayoutManager(new GridLayoutManager(getActivity(), 3));
+        mRecycleView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
         //获得适配器
-//        mRecycleView.addItemDecoration(new SpacesItemDecoration(20));
         adapter = new MygoodsAdpter(getActivity(), list_goods);
         //设置适配器到组件
         mRecycleView.setAdapter(adapter);
         Log.e("test", "onCreateView:--> " + linearLayout1);
 //
         service = new Intent(getActivity(), MQService.class);
-        getActivity().startService(service);
         isBound = getActivity().bindService(service, connection, Context.BIND_AUTO_CREATE);
-        recyclerView = (RecyclerView) view.findViewById(R.id.recy_bringinto);
+//        recyclerView = (RecyclerView) view.findViewById(R.id.recy_bringinto);
 
         //详情页面取消购买
         bt_buy_qx.setOnClickListener(new View.OnClickListener() {
@@ -204,42 +216,50 @@ public class BuyFragment extends Fragment{
             public void onClick(View v) {
                 linearLayout2.setVisibility(View.GONE);
                 linearLayout1.setVisibility(View.VISIBLE);
-                tv_xq_number.setText("1");
+//                tv_xq_number.setText("1");
                 i = 1;
+//                ((FirstActivity)getActivity()).startAD();
+                ((FirstActivity)getActivity()).stopBuyGoods();
+
             }
         });
         IntentFilter intentFilter = new IntentFilter("BuyFragment");
-
         receiver = new MessageReceiver();
-
         getActivity().registerReceiver(receiver, intentFilter);
         //详情界面立即购买
         bt_buy_gm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showProgressDialog("请稍候。。。。");
-                if (mqService != null) {
-                    try {
+                if (Utils.isFastClick()) {
+                        showProgressDialog("请稍候。。。。");
+//                    ((FirstActivity)getActivity()).stopAD();
+                        if (mqService != null) {
+                            try {
+//                            mqService.stopDownload();
+                                boolean isConn = NetWorkUtil.isConn(MyApplication.getContext());
+                                JSONObject jsonObject = new JSONObject();
+                                jsonObject.put("commodityNo", commodityNo);
+                                jsonObject.put("name", tv_xq_name.getText());
+                                jsonObject.put("number", i);
+                                jsonObject.put("price", 0.01);
+                                String s = jsonObject.toString();
+                                Log.e("PPPPPPPPPPPP", "onClick: -->" + s);
+                                boolean success = mqService.publish("coffee/" + szImei + "/deal/create", 2, s);
+                                Log.i("succ", "-->" + success);
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
 
-                        JSONObject jsonObject = new JSONObject();
-                        jsonObject.put("commodityNo", commodityNo);
-                        jsonObject.put("name", tv_xq_name.getText());
-                        jsonObject.put("number", i);
-                        jsonObject.put("price", "0.01");
-                        String s = jsonObject.toString();
-                        boolean success = mqService.publish("coffee/1234/deal/create", 2, s);
-                        Log.i("succ", "-->" + success);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+
+                        }
 
 
                 }
             }
         });
 
-        //多个商品的立即购买
-        bt_buy.setOnClickListener(new View.OnClickListener() {
+        //多个商品的立即购买（保留以后再做）
+       /* bt_buy.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 int size = 0;
@@ -290,16 +310,15 @@ public class BuyFragment extends Fragment{
             }
 
 
-        });
+        });*/
 
 
-        //详情界面添加数量
-        tv_xq_number.setText("1");
+        //详情界面添加数量（保留以后再做）
+     /*   tv_xq_number.setText("1");
         iv_xq_add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-//                speechText();
                 textToVoice(getActivity(),"帅个毛线");
                 i = i + 1;
                 tv_xq_number.setText(String.valueOf(i));
@@ -315,11 +334,49 @@ public class BuyFragment extends Fragment{
 
             }
         });
+*/
 
+        hasgoodCount hasgoodCount = new hasgoodCount(4000,1000);
+        hasgoodCount.start();
 
         return view;
     }
 
+    class hasgoodCount extends CountDownTimer{
+
+        public hasgoodCount(long millisInFuture, long countDownInterval) {
+            super(millisInFuture, countDownInterval);
+        }
+
+        @Override
+        public void onTick(long l) {
+
+            Log.e("goods", "倒计时: -->"+(l)/1000 );
+        }
+
+        @Override
+        public void onFinish() {
+            hasgoods();
+        }
+    }
+
+    public void SeterrorCode (int code ,String errorCode){
+        if (code==1){
+            tv_buy_mes.setText(errorCode);
+            tv_buy_mes.setTextColor(getActivity().getResources().getColor(R.color.red_normal));
+            CanBuy=false;
+        }
+        if (code==2){
+            tv_buy_mes.setText(errorCode);
+            tv_buy_mes.setTextColor(getActivity().getResources().getColor(R.color.black));
+            CanBuy=true;
+        }
+        if (code==3){
+            tv_buy_mes.setText(errorCode);
+            tv_buy_mes.setTextColor(getActivity().getResources().getColor(R.color.black));
+            CanBuy=false;
+        }
+    }
 
 
     public class SpacesItemDecoration extends RecyclerView.ItemDecoration {
@@ -353,9 +410,198 @@ public class BuyFragment extends Fragment{
         WindowManager.LayoutParams params = progressDialog.getWindow().getAttributes();
         progressDialog.getWindow().setGravity(Gravity.BOTTOM);
         params.y = 360;
+        mHandler.sendEmptyMessageDelayed(MSG_DISMISS_DIALOG, 8000);
         progressDialog.show();
     }
 
+    private static int MSG_DISMISS_DIALOG = 0;
+    private static int QQQ_DISMISS_DIALOG = 1;
+    private static int UI_DISMISS_DIALOG = 2;
+    private static int OUTGOOD_DISMISS_DIALOG = 3;
+    @SuppressLint("HandlerLeak")
+    private Handler mHandler = new Handler(){
+
+        @Override
+        public void handleMessage(Message msg) {
+            // TODO Auto-generated method stub
+            super.handleMessage(msg);
+
+            if(MSG_DISMISS_DIALOG == msg.what){
+                if(null != progressDialog){
+                    if(progressDialog.isShowing()){
+                        Log.i("TTTTTT", "handler get mesage");
+                        progressDialog.dismiss();
+                        mqService.starThread();
+                    }
+                }
+            }
+            if(QQQ_DISMISS_DIALOG == msg.what){
+                if(null != dia){
+                    if(dia.isShowing()){
+                        Log.i("TTTTTT", "handler get mesage");
+                        dia.dismiss();
+
+                    }
+                }
+            }
+            if(UI_DISMISS_DIALOG == msg.what){
+                if (downloadThread!=null){
+                    downloadThread.setStop(true);
+                    downloadThread=null;
+                }
+                if (dia!=null&&dia.isShowing()){
+                    dia.dismiss();
+                }
+//                ((FirstActivity)getActivity()).startAD();
+//                tv_xq_number.setText("1");
+                i = 1;
+
+            }
+            if(OUTGOOD_DISMISS_DIALOG == msg.what){
+                linearLayout2.setVisibility(View.GONE);
+                linearLayout1.setVisibility(View.VISIBLE);
+//                提示图片
+                dia = new Dialog(getActivity(), R.style.edit_AlertDialog_style);//设置进入时跳出提示框
+                dia.setContentView(R.layout.dialog_goodsout);
+                ImageView imageView = (ImageView) dia.findViewById(R.id.iv_pay_success);
+                try {
+                    GifDrawable gifDrawable1=new GifDrawable(getResources(),R.mipmap.goodsout);
+                    gifDrawable1.start();
+                    imageView.setImageDrawable(gifDrawable1);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                dia.show();
+                dia.setCanceledOnTouchOutside(false); // 设置屏幕点击退出
+                Window w = dia.getWindow();
+                WindowManager.LayoutParams lp = w.getAttributes();
+                lp.x = 0;
+                dia.onWindowAttributesChanged(lp);
+                if (posz!=-1){
+                    goods goods= list_goods.get(posz);
+                    SaleGoods saleGoods = saleGoodsDaoImp.findByHdHp(goods.getHd(),goods.getHp());
+                    int goodsNum = saleGoods.getGoodsNum();
+                    saleGoods.setGoodsNum(goodsNum-1);
+                    saleGoodsDaoImp.update(saleGoods);
+                }
+                ((FirstActivity)getActivity()).hideADpage();
+                hasgoodCount hasgoodCount = new hasgoodCount(3000,1000);
+                hasgoodCount.start();
+            }
+        }
+
+
+    };
+
+    /*判断是否有货*/
+    String sss;
+  /*  public void hasgoods(){
+//        String drinks = FirstActivity.getDrinks();
+        String drinks = "FFFFFF";
+        if (!TextUtils.isEmpty(drinks)){
+            String drink1 = drinks.substring(0,2);
+            String drink2 = drinks.substring(2,4);
+            String drink3 = drinks.substring(4,6);
+            int has1 = Integer.valueOf(drink1,16);
+            int has2 = Integer.valueOf(drink2,16);
+            int has3 = Integer.valueOf(drink3,16);
+            String s1=addZeroForNum(Integer.toBinaryString(has1),8);
+            String s2=addZeroForNum(Integer.toBinaryString(has2),8);
+            String s3=addZeroForNum(Integer.toBinaryString(has3),8);
+            sss =  s1 +  s2 + s3;
+            String z = "";
+            Log.e("GGGGGGTTTTT", "hasgoods: -->"+sss+">>>"+sss.length() );
+//            for (int i = 0;i<sss.length();i++){
+//                if (i<6){
+//                    list_goods.get(4*i).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
+//                    goodsDaoImp.update(list_goods.get(4*i));
+//                }else if (i>=6&&i<12){
+//                    list_goods.get(4*(i-6)+1).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
+//                    Log.e("GGGGGGGGTTTTT!", "hasgoods: ==>"+sss.substring(i,i+1) );
+//                    goodsDaoImp.update(list_goods.get(4*(i-6)+1));
+//                }else if (i>=12&&i<18){
+//                    list_goods.get(4*(i-12)+2).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
+//                    goodsDaoImp.update(list_goods.get(4*(i-12)+2));
+//                }else if (i>=18&&i<24){
+//                    list_goods.get(4*(i-18)+3).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
+//                    goodsDaoImp.update(list_goods.get(4*(i-18)+3));
+//                }
+//            }
+            for (int i = 0 ;i<list_goods.size();i++){
+              goods goods = list_goods.get(i);
+              int  hd = Integer.valueOf(goods.getHd());
+              int  hp = Integer.valueOf(goods.getHp());
+              goods.setHasGoods(Integer.valueOf(sss.substring(6*(hd-1)+(hp-1),6*(hd-1)+hp)));
+              list_goods.set(i,goods);
+              goodsDaoImp.update(goods);
+            }
+            adapter.notifyDataSetChanged();
+
+        }
+
+
+    }*/
+
+    public void hasgoods(){
+        String drinks = FirstActivity.getDrinks();
+//        String drinks = "FFFFFF";
+        if (!TextUtils.isEmpty(drinks)){
+            String drink1 = drinks.substring(0,2);
+            String drink2 = drinks.substring(2,4);
+            String drink3 = drinks.substring(4,6);
+            int has1 = Integer.valueOf(drink1,16);
+            int has2 = Integer.valueOf(drink2,16);
+            int has3 = Integer.valueOf(drink3,16);
+            String s1=addZeroForNum(Integer.toBinaryString(has1),8);
+            String s2=addZeroForNum(Integer.toBinaryString(has2),8);
+            String s3=addZeroForNum(Integer.toBinaryString(has3),8);
+            sss =  s1 +  s2 + s3;
+            String z = "";
+            Log.e("GGGGGGTTTTT", "hasgoods: -->"+sss+">>>"+sss.length() );
+//            for (int i = 0;i<sss.length();i++){
+//                if (i<6){
+//                    list_goods.get(4*i).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
+//                    goodsDaoImp.update(list_goods.get(4*i));
+//                }else if (i>=6&&i<12){
+//                    list_goods.get(4*(i-6)+1).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
+//                    Log.e("GGGGGGGGTTTTT!", "hasgoods: ==>"+sss.substring(i,i+1) );
+//                    goodsDaoImp.update(list_goods.get(4*(i-6)+1));
+//                }else if (i>=12&&i<18){
+//                    list_goods.get(4*(i-12)+2).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
+//                    goodsDaoImp.update(list_goods.get(4*(i-12)+2));
+//                }else if (i>=18&&i<24){
+//                    list_goods.get(4*(i-18)+3).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
+//                    goodsDaoImp.update(list_goods.get(4*(i-18)+3));
+//                }
+//            }
+            for (int i = 0 ;i<list_goods.size();i++){
+                goods goods = list_goods.get(i);
+                int  hd = Integer.valueOf(goods.getHd());
+                int  hp = Integer.valueOf(goods.getHp());
+                goods.setHasGoods(Integer.valueOf(sss.substring(6*(hd-1)+(hp-1),6*(hd-1)+hp)));
+                list_goods.set(i,goods);
+                goodsDaoImp.update(goods);
+            }
+            adapter.notifyDataSetChanged();
+
+        }
+
+
+    }
+        public static String addZeroForNum(String str,int strLength) {
+            int strLen =str.length();
+            if (strLen <strLength) {
+                while (strLen< strLength) {
+                    StringBuffer sb = new StringBuffer();
+                    sb.append("0").append(str);//左补0
+//    sb.append(str).append("0");//右补0
+                    str= sb.toString();
+                    strLen= str.length();
+                }
+            }
+
+            return str;
+        }
     //隐藏等待dialog
     public void hideProgressDialog() {
         if (progressDialog != null)
@@ -394,7 +640,8 @@ public class BuyFragment extends Fragment{
     String wxCode;
     Dialog dia;
     boolean buy = false;
-
+    boolean isgoing ; // 判断是否出货
+    DownloadThread downloadThread;//读取出货线程
     /**
      * 接收到mqtt的广播
      */
@@ -406,50 +653,49 @@ public class BuyFragment extends Fragment{
             order = (Order) intent.getSerializableExtra("message");
             result = intent.getIntExtra("payresult", -1);
             String mess = intent.getStringExtra("mes_new");
-            String mesdel = intent .getStringExtra("mes_delgoods");
-            Log.e("mess", "onReceive: "+mess );
+            String mesdel = intent.getStringExtra("mes_delgoods");
+            Log.e("mess", "onReceive: " + mess);
+            Log.e("DDDDDDDDD", "onReceive: -->"+result );
+
             if (order != null) {
-
-                if (order.getResult() != -1) {
+                    int a =0;
+                    int b = a;
+                    if (order.getResult() !=-1&&progressDialog.isShowing()) {
                     hideProgressDialog();
-
                     aliCode = order.getAliCode();
                     wxCode = order.getWxCode();
-                    payDialog(aliCode, wxCode);
-
-                } else {
+                    if (!TextUtils.isEmpty(aliCode)&&(!TextUtils.isEmpty(wxCode))){
+                        payDialog(aliCode, wxCode);
+                    }
+                } else if (order.getResult() == -1&&progressDialog.isShowing()){
                     hideProgressDialog();
                     dia = new Dialog(context, R.style.edit_AlertDialog_style);//设置进入时跳出提示框
                     dia.setContentView(R.layout.dialog_buy);
                     ImageView imageView = (ImageView) dia.findViewById(R.id.iv_pay_success);
-                    imageView.setBackgroundResource(R.mipmap.buy_fail);
                     imageView.setImageResource(R.mipmap.getcode_fail);
                     dia.show();
-                    dia.setCanceledOnTouchOutside(true); // 设置屏幕点击退出
+                    dia.setCanceledOnTouchOutside(false); // 设置屏幕点击退出
                     Window w = dia.getWindow();
                     WindowManager.LayoutParams lp = w.getAttributes();
                     lp.x = 0;
                     dia.onWindowAttributesChanged(lp);
-                    CountTimer countTimer = new CountTimer(4000, 1000);
-                    countTimer.start();
+                    mHandler.sendEmptyMessageDelayed(QQQ_DISMISS_DIALOG, 4000);
+
 
                 }
 
-
-//               new LoadQrAsync().execute();
-
             }
             //支付结果 1成功 0失败
-            if (result != -1) {
+            if (result != -1&&codeDialog.isShowing()) {
+                if (codeDialog != null && codeDialog.isShowing()) {
+                    codeDialog.dismiss();
+                }
                 if (result == 0) {
-                    if (codeDialog.isShowing()){
-                        codeDialog.dismiss();
-                    }
+
 //                   提示图片
                     dia = new Dialog(context, R.style.edit_AlertDialog_style);//设置进入时跳出提示框
                     dia.setContentView(R.layout.dialog_buy);
                     ImageView imageView = (ImageView) dia.findViewById(R.id.iv_pay_success);
-                    imageView.setBackgroundResource(R.mipmap.buy_fail);
                     imageView.setImageResource(R.mipmap.buy_fail);
                     dia.show();
                     dia.setCanceledOnTouchOutside(true); // 设置屏幕点击退出
@@ -457,49 +703,22 @@ public class BuyFragment extends Fragment{
                     WindowManager.LayoutParams lp = w.getAttributes();
                     lp.x = 0;
                     dia.onWindowAttributesChanged(lp);
-                    CountTimer countTimer = new CountTimer(4000, 1000);
-                    countTimer.start();
+                    mHandler.sendEmptyMessageDelayed(QQQ_DISMISS_DIALOG, 4000);
                 } else if (result == 1) {
 //                    ((FirstActivity)getActivity()).stopvideo();
 
 //                    if (codeDialog.isShowing()){
 //                        codeDialog.dismiss();
 //                    }
-                    dia = new Dialog(context, R.style.edit_AlertDialog_style);//设置进入时跳出提示框
-                    dia.setContentView(R.layout.dialog_buy);
-                    ImageView imageView = (ImageView) dia.findViewById(R.id.iv_pay_success);
-                    imageView.setBackgroundResource(R.mipmap.buy_sussess);
-                    dia.show();
-                    dia.setCanceledOnTouchOutside(true); // 设置屏幕点击退出
-                    Window w = dia.getWindow();
-                    WindowManager.LayoutParams lp = w.getAttributes();
-                    lp.x = 0;
-                    dia.onWindowAttributesChanged(lp);
-                    CountTimer countTimer = new CountTimer(4000, 1000);
-                    countTimer.start();
                     /**
-                     *
-                     * 支付成功给mcu发指令
-                     * ***/
-                    int jy = AryChangeManager.stringToHex("06")[0];
-                    int jy1 = AryChangeManager.stringToHex("01")[0];
-                    int jy2 = AryChangeManager.stringToHex("00")[0];
-                    int jy3 = AryChangeManager.stringToHex("1E")[0];
-                    int jy4 = AryChangeManager.stringToHex("14")[0];
-                    int jy5 = AryChangeManager.stringToHex("01")[0];
-                    int jy6 = AryChangeManager.stringToHex("2C")[0];
-                    String i2 = AryChangeManager.dexToHex(x1 ^ x2 ^ c2 ^ jy ^ jy1 ^ jy2 ^ jy3 ^ jy4 ^ jy5 ^ jy6);
-                    String str = machineType + machineAdress + command2 + "06" + "01" + "00" + "1E" + "14" + "01" + "2C" + i2;
-                    Log.e("test", "onClick: " + str);
-                    if (isHexTransport) {
-                        Toast.makeText(getActivity(), "购买1号", Toast.LENGTH_SHORT).show();
-                        SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                     * 支付成功时将语音归零
+                     * **/
 
-                    }
+                    StartMakedrinks(context);
 
                 }
             }
-
+//
             if (!TextUtils.isEmpty(mess)) {
                 try {
                     JSONObject jsonObjectnew = new JSONObject(mess);
@@ -531,39 +750,44 @@ public class BuyFragment extends Fragment{
                     if (jsonObjectnew.has("detailPic")) {
                         detailPic = jsonObjectnew.getString("detailPic");
                     }
-                    goods good = new goods();
-                    good.setGoodsName(name);
-                    good.setPrice(price);
-                    good.setGoodsId(Long.valueOf(commodityNo));
-                    good.setFormulation(formulation);
-                    good.setDetailPic(detailPic);
-                    good.setEfficiency(efficiency);
-                    good.setListPic(listPic);
-                    good.setNumber(1);
-                    good.setVal(1);
-                    goodsDaoImp.insert(good);
-                    list_goods.add(good);
-                    newlist_goods.add(good);
-                    adapter.notifyDataSetChanged();
+                    List<SaleGoods> saleGoods = saleGoodsDaoImp.findByGoodsID(Long.valueOf(commodityNo));
+                    goods good = goodsDaoImp.findById(Long.valueOf(commodityNo));
+                    if (good!=null&&saleGoods.size()!=0){
+                        good.setGoodsName(name);
+                        good.setPrice(price);
+                        good.setGoodsId(Long.valueOf(commodityNo));
+                        good.setFormulation(formulation);
+                        good.setDetailPic(detailPic);
+                        good.setEfficiency(efficiency);
+                        good.setListPic(listPic);
+                        good.setNumber(1);
+                        good.setVal(1);
+                        goodsDaoImp.update(good);
+                        int pos = list_goods.indexOf(good);
+                        list_goods.set(pos,good);
+                        newlist_goods.add(pos,good);
+                        adapter.notifyDataSetChanged();
+                    }
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
-            if (!TextUtils.isEmpty(mesdel)){
+            if (!TextUtils.isEmpty(mesdel)) {
                 String commodityNo = "";
                 try {
                     JSONObject jsonObject = new JSONObject(mesdel);
 
-                    if (jsonObject.has("commodityNo")){
-                        commodityNo=jsonObject.getString("commodityNo");
+                    if (jsonObject.has("commodityNo")) {
+                        commodityNo = jsonObject.getString("commodityNo");
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                Log.e("good3", "onReceive:--> "+commodityNo );
+                Log.e("good3", "onReceive:--> " + commodityNo);
                 goods good3 = new goods();
                 good3 = goodsDaoImp.findById(Long.valueOf(commodityNo));
-                Log.e("good3", "onReceive: "+good3 );
+                Log.e("good3", "onReceive: " + good3);
                 goodsDaoImp.delete(good3);
                 list_goods.remove(good3);
                 newlist_goods.remove(good3);
@@ -572,47 +796,165 @@ public class BuyFragment extends Fragment{
             }
         }
     }
+    Dialog diaer;
+    private void StartMakedrinks(Context context) {
+        diaer = new Dialog(context, R.style.edit_AlertDialog_style);//设置进入时跳出提示框
+        diaer.setContentView(R.layout.dialog_buy);
+        ImageView imageView =   diaer.findViewById(R.id.iv_pay_success);
+        imageView.setBackgroundResource(R.mipmap.buy_sussess);
+        diaer.show();
+        textToVoice(getActivity(), "正在出货");
+        diaer.setCanceledOnTouchOutside(false); // 设置屏幕点击退出
+        Window w = diaer.getWindow();
+        WindowManager.LayoutParams lp = w.getAttributes();
+        lp.x = 0;
+        diaer.onWindowAttributesChanged(lp);
+        diaer.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface) {
+                if (isgoing){
+                    textToVoice(getActivity(), "出货成功");
 
 
+//                                try {
+//                                    JSONObject jsonObject = new JSONObject();
+//                                    jsonObject.put("orderNo",order.getOrderNo());
+//                                    jsonObject.put("result",1);
+//                                    mqService.sentGoodsSuccess(jsonObject);
+//                                } catch (JSONException e) {
+//                                    e.printStackTrace();
+//                                }
+                }else {
+                    textToVoice(getActivity(), "出货失败");
+                    downloadThread.setStop(true);
+                    downloadThread=null;
+
+//                    try {
+//                        JSONObject jsonObject = new JSONObject();
+//                        jsonObject.put("orderNo",order.getOrderNo());
+//                        jsonObject.put("result",0);
+//                        mqService.sentGoodsSuccess(jsonObject);
+//                    } catch (JSONException e) {
+//                        e.printStackTrace();
+//                    }
+                }
+            }
+        });
+        /*
+         * 支付成功给mcu发指令
+         * */
+//        downloadThread = new DownloadThread();
+//        downloadThread.start();测试
+
+        String action = FirstActivity.getNowAction();
+        Log.e("action", "onReceive: --" + action);
+        if (!TextUtils.isEmpty(action)){
+
+//      mqService.starThread();
+                if (action.equals("00")) {
+                    sendBuyMess();
+                }
+                downloadThread = new DownloadThread();
+                downloadThread.start();
+//                ((FirstActivity)getActivity()).stopAD();
 
 
-
-
-
-
-
-    /****
-     * 倒计时
-     */
-
-
-    class CountTimer extends CountDownTimer {
-        public CountTimer(long millisInFuture, long countDownInterval) {
-            super(millisInFuture, countDownInterval);
         }
 
-        /**
-         * 倒计时过程中调用
-         *
-         * @param millisUntilFinished
-         */
-        @Override
-        public void onTick(long millisUntilFinished) {
 
-            Log.e("Tag", "倒计时=" + (millisUntilFinished / 1000));
-        }
-
-        /**
-         * 倒计时完成后调用
-         */
-
-        @Override
-        public void onFinish() {
-            Log.e("Tag", "倒计时完成");
-            //设置倒计时结束之后的按钮样式
-            dia.dismiss();
-        }
     }
+
+
+    class DownloadThread extends Thread {
+        boolean isStop = false;
+        int j =1;
+        int count = 0;
+        public void setStop(boolean stop) {
+            isStop = stop;
+        }
+
+        @Override
+        public void run() {
+            super.run();
+            while (!isStop) {
+//               这里是读文件流 和写文件流的操作
+                try {
+
+                    Thread.sleep(2000);
+                    String result = FirstActivity.getResult();
+//                    String result = "01";
+                    Log.e("FFFFFFFFTTTT", "run: -->读取状态" + result);
+//                    count++;
+//                    if (count==10){
+//                        result="02";
+//                    }
+//                    if (count==15){
+//                        result="00";
+//                    }
+
+                    if ("01".equals(result)) {
+                     //  正在出货
+                        count=1;
+                    }
+                    if ("02".equals(result)) {
+                            isgoing=true;
+                            diaer.dismiss();
+                            if (j==1) {
+                                Message message = new Message();
+                                message.what = OUTGOOD_DISMISS_DIALOG;
+                                //然后将消息发送出去
+                                mHandler.sendMessage(message);
+                                j=0;
+                            }
+                    }
+                    if ("03".equals(result)) {
+                            isgoing=false;
+                            i = 1;
+                            dia.dismiss();
+                    }
+                    if (count==1){
+                        if ("00".equals(result)){
+                            Message message=new Message();
+                            message.what=UI_DISMISS_DIALOG;
+                            //然后将消息发送出去
+                            mHandler.sendMessage(message);
+                            count=0;
+                        }
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+
+    int b1=0;
+    int b2 = 0;
+    public void sendBuyMess() {
+        b1=0;
+        b2=0;
+        Log.e("position", "sendBuyMess: -->"+posz );
+        int size1 = list_goods.size();
+        goods goods= list_goods.get(posz);
+        b1 =Integer.valueOf(goods.getHd());
+        b2 =Integer.valueOf(goods.getHp());
+        String temperature1 =  Integer.toHexString(goods.getTemperature()) ;
+        String waterHeight = Integer.toHexString(goods.getWaterQuantity()/256);
+        String waterLow = Integer.toHexString(goods.getWaterQuantity()%256);
+        Log.e("position", "sendBuyMess: -->"+posz+goods.getHd()+"....."+goods.getHp() );
+        String i2 = AryChangeManager.dexToHex(x1 ^ x2 ^ c2 ^5^ b1 ^ b2 ^ Integer.valueOf(temperature1,16)^Integer.valueOf(waterHeight,16)^Integer.valueOf(waterLow,16) );
+        String str = machineType + machineAdress + command2 + "05"+"0"+b1 + "0"+b2 +temperature1+"0"+waterHeight+waterLow + i2;
+            Log.e("str", "sendBuyMess: -->"+str );
+        Log.e("strzzz", "sendBuyMess: -->"+temperature1+"...."+ Integer.valueOf(temperature1,16)+"...."+waterHeight+"..."+waterLow );
+
+        if (isHexTransport) {
+
+            SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+
+        }}
 
     /**
      * 绑定service
@@ -638,10 +980,7 @@ public class BuyFragment extends Fragment{
      * 下部的购买列表
      ***/
     public void setAAA(int position) {
-//        sign=adapter.getSign();
-//        choosecoffeAdapter = new ChoosecoffeAdapter(getActivity(),sign);
-//        recyclerView.setAdapter(choosecoffeAdapter);
-        sign = adapter.getSign();
+       /* sign = adapter.getSign();
         mgoods = new ArrayList<>();
         for (int i = 0; i < sign.length; i++) {
             if (sign[i] == 1) {
@@ -656,9 +995,8 @@ public class BuyFragment extends Fragment{
 
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-
         choosecoffeAdapter = new ChoosecoffeAdapter(getActivity(), mgoods);
-        recyclerView.setAdapter(choosecoffeAdapter);
+        recyclerView.setAdapter(choosecoffeAdapter);*/
     }
 
     /**
@@ -666,7 +1004,7 @@ public class BuyFragment extends Fragment{
      **/
 
     public void setVal(int position, int val) {
-        sign = adapter.getSign();
+    /*    sign = adapter.getSign();
         newmgoods = new ArrayList<>();
         for (int i = 0; i < sign.length; i++) {
             newlist_goods.get(position).setVal(val);
@@ -674,8 +1012,9 @@ public class BuyFragment extends Fragment{
                 newmgoods.add(newlist_goods.get(i));
                 Log.e("qqqeeeeee", "setVal: -->" + list_goods.get(i).getVal());
 
+
             }
-        }
+        }*/
     }
 
     /**
@@ -693,8 +1032,10 @@ public class BuyFragment extends Fragment{
 //        final TextView tv_time = (TextView)getActivity().findViewById(R.id.tv_time);
         timer = new Timer();
         task = new TimerTask() {
+
             @Override
             public void run() {
+
                 getActivity().runOnUiThread(new Runnable() {   // UI thread
                     @Override
                     public void run() {
@@ -707,6 +1048,7 @@ public class BuyFragment extends Fragment{
                         if (recLen == 0) {
                             timer.cancel();
                             codeDialog.dismiss();
+                            mqService.starThread();
                             recLen = 180;
                             if (codeDialog.isShowing()) {
                                 Log.e("Show", "initstar:show1 ");
@@ -717,26 +1059,40 @@ public class BuyFragment extends Fragment{
             }
         };
         timer.schedule(task, 1000, 1000);    // timeTask
+
     }
+
+public boolean getCanBuy(){
+        return CanBuy;
+}
 
     /**
      * 显示详情界面
      **/
+    int posz=-1;
     public void setView() {
-        int position = adapter.getPosition();
-        Log.e("position", "setView:--> " + position);
-        linearLayout1.setVisibility(View.GONE);
-        linearLayout2.setVisibility(View.VISIBLE);
-        Glide.with(getActivity()).load(list_goods.get(position).getDetailPic())
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .into( iv_xq_pic);
+        Log.e("BBBBBBDDDDDDD", "setView: -->"+CanBuy );
+//        if (CanBuy) {
+            int position = adapter.getPosition();
+            posz = position;
+            Log.e("position", "setView:--> " + position + "。。。" + posz);
+            linearLayout1.setVisibility(View.GONE);
+            linearLayout2.setVisibility(View.VISIBLE);
+            Glide.with(getActivity()).load(list_goods.get(position).getDetailPic())
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .into(iv_xq_pic);
 //        iv_xq_pic.setImageResource(adapter.getImgsid());
-        tv_xq_name.setText(list_goods.get(position).getGoodsName());
-        tv_xq_adress.setText("配方");
-        tv_xq_adressmes.setText(list_goods.get(position).getFormulation());
-        tv_xq_gxmes.setText(list_goods.get(position).getEfficiency());
-        tv_xq_price.setText(list_goods.get(position).getPrice() + "元");
-        commodityNo = String.valueOf(position);
+            tv_xq_name.setText(list_goods.get(position).getGoodsName());
+            tv_xq_adress.setText("配方");
+            tv_xq_adressmes.setText(list_goods.get(position).getFormulation());
+            tv_xq_gxmes.setText(list_goods.get(position).getEfficiency());
+            tv_xq_price.setText(list_goods.get(position).getPrice() + "元");
+//        commodityNo = String.valueOf(position);
+            commodityNo = list_goods.get(position).getGoodsId() + "";
+//            StartMakedrinks(getActivity());
+//        ((FirstActivity)getActivity()).stopAD();
+//        }
+
     }
 
     @Override
@@ -748,6 +1104,9 @@ public class BuyFragment extends Fragment{
         }
         if (receiver != null) {
             getActivity().unregisterReceiver(receiver);
+        }
+        if (downloadThread!=null){
+            downloadThread=null;
         }
     }
 
@@ -766,15 +1125,6 @@ public class BuyFragment extends Fragment{
         mTts.setParameter(SpeechConstant.TTS_AUDIO_PATH, "./sdcard/iflytek.pcm");
         //3.开始合成,第一个参数就是转成声音的文字,可以自定义  第二个参数是合成监听器对 象。 我们不需要对声音有什么特殊处理,就传null
         mTts.startSpeaking(text, null);
-    }
-
-
-
-
-    @Override
-    public void onDestroy() {
-
-        super.onDestroy();
     }
 
 
