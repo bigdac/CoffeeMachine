@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="vendingmachine.xr.com.coffeemachine">
     <!-- 获取运营商信息，用于支持提供运营商信息相关的接口 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -30,9 +31,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar"
+
         android:name=".application.MyApplication"
         android:hardwareAccelerated="true"
-        >
+        tools:ignore="GoogleAppIndexingWarning">
         <meta-data
             android:name="com.baidu.lbsapi.API_KEY"
             android:value="TGVPGFUP2ogcHA4hjN6D0RF7TTh8faTF" />

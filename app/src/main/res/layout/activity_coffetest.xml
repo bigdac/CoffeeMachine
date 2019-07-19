@@ -34,6 +34,7 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
+
             android:background="@drawable/bg_shape_testbj"
             >
             <TextView
@@ -49,6 +50,7 @@
             <RelativeLayout
                 android:id="@+id/rl_bz_1"
                 android:layout_width="wrap_content"
+                android:visibility="gone"
                 android:layout_height="150dp"
                 android:layout_marginTop="42dp">
 
@@ -224,14 +226,126 @@
                     android:background="#f5f5" />
 
             </RelativeLayout>
-
+            <RelativeLayout
+                android:id="@+id/rl_bz_3"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_marginTop="42dp">
+                <TextView
+                    android:id="@+id/tv_cup_wdt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="设置温度（单位℃）："
+                    android:layout_marginLeft="20dp"
+                    android:textSize="17sp"
+                    />
+                <TextView
+                    android:id="@+id/tv_cup_szwd"
+                    android:layout_toRightOf="@+id/tv_cup_wdt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="75"
+                    android:textSize="17sp"
+                    />
+                <TextView
+                    android:id="@+id/tv_cup_llt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="设置流量:（单位ml）"
+                    android:layout_marginLeft="70dp"
+                    android:layout_toRightOf="@+id/et_cup_sdwd"
+                    android:textSize="17sp"
+                    />
+                <TextView
+                    android:id="@+id/tv_cup_szll"
+                    android:layout_toRightOf="@+id/tv_cup_llt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="280"
+                    android:textSize="17sp"
+                    />
+                <EditText
+                    android:id="@+id/et_cup_sdwd"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    android:background="@color/white"
+                    android:layout_below="@+id/tv_cup_szwd"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="设置温度"
+                    android:inputType="number"
+                    />
+                <EditText
+                    android:id="@+id/et_cup_sdll"
+                    android:layout_width="200dp"
+                    android:layout_height="40dp"
+                    android:background="@color/white"
+                    android:layout_below="@+id/tv_cup_szwd"
+                    android:layout_toRightOf="@+id/et_cup_sdwd"
+                    android:layout_marginLeft="70dp"
+                    android:layout_marginTop="10dp"
+                    android:hint="设置流量"
+                    android:inputType="number"
+                    />
+                <Button
+                    android:id="@+id/bt_cup_bc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="保存"
+                    android:layout_below="@+id/et_cup_sdll"
+                    android:layout_alignRight="@+id/et_cup_sdll"
+                    android:layout_marginTop="20sp"
+                    />
+                <TextView
+                    android:id="@+id/tv_cup_sjwdt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_toRightOf="@+id/et_cup_sdll"
+                    android:text="当前温度（单位℃）"
+                    android:layout_marginLeft="120dp"
+                    android:layout_marginTop="30dp"
+                    android:textSize="20sp"
+                    />
+                <TextView
+                    android:id="@+id/tv_cup_sjwd"
+                    android:layout_toRightOf="@+id/tv_cup_sjwdt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="75"
+                    android:textSize="20sp"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="30dp"
+                    />
+                <TextView
+                    android:id="@+id/tv_cup_sjllt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@+id/tv_cup_sjwdt"
+                    android:layout_toRightOf="@+id/et_cup_sdll"
+                    android:text="当前流量（单位ml）"
+                    android:layout_marginLeft="120dp"
+                    android:layout_marginTop="30dp"
+                    android:textSize="20sp"
+                    />
+                <TextView
+                    android:id="@+id/tv_cup_sjll"
+                    android:layout_toRightOf="@+id/tv_cup_sjwdt"
+                    android:layout_below="@+id/tv_cup_sjwdt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="150"
+                    android:textSize="20sp"
+                    android:textColor="@color/black"
+                    android:layout_marginTop="30dp"
+                    />
+            </RelativeLayout>
             <RelativeLayout
                 android:id="@+id/rl_bz_2"
-                android:layout_below="@+id/rl_bz_1"
+                android:layout_below="@+id/rl_bz_3"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="50dp"
                 >
+
                 <TextView
                     android:id="@+id/tv_coofe_type"
                     android:layout_width="match_parent"
@@ -245,16 +359,17 @@
 
             </RelativeLayout>
 
-            <Button
-            android:id="@+id/bt_make_coffe"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/rl_bz_2"
-            android:layout_marginTop="20dp"
-            android:layout_marginLeft="80dp"
-            android:text="制作饮料"
-            />
-            <Button
+            <!--<Button-->
+            <!--android:id="@+id/bt_make_coffe"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_below="@+id/rl_bz_2"-->
+            <!--android:layout_marginTop="20dp"-->
+            <!--android:layout_marginLeft="80dp"-->
+            <!--android:layout_marginBottom="20sp"-->
+            <!--android:text="制作饮料"-->
+            <!--/>-->
+          <!--  <Button
                 android:id="@+id/bt_cup_cjn"
                 android:layout_alignTop="@+id/bt_make_coffe"
                 android:layout_width="wrap_content"
@@ -262,13 +377,13 @@
                 android:layout_toRightOf="@+id/bt_make_coffe"
                 android:layout_marginLeft="30dp"
                 android:text="出胶囊"
-                />
+                />-->
             <Button
                 android:id="@+id/bt_cup_clean"
-                android:layout_alignTop="@+id/bt_make_coffe"
+                android:layout_below="@+id/rl_bz_2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
+                android:layout_margin="10dp"
                 android:text="清空提示区/初始化状态"
                 />
             <Button
@@ -276,9 +391,9 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="刷新胶囊"
-                android:layout_alignTop="@+id/bt_make_coffe"
-                android:layout_toLeftOf="@+id/bt_coffe_fw"
-                android:layout_marginRight="30dp"
+                android:layout_below="@+id/rl_bz_2"
+                android:layout_toRightOf="@+id/bt_cup_clean"
+                android:layout_margin="10dp"
 
                 />
             <Button
@@ -286,9 +401,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_below="@+id/rl_bz_2"
-                android:layout_alignParentRight="true"
-                android:layout_marginTop="20dp"
-                android:layout_marginRight="80dp"
+                android:layout_toRightOf="@+id/bt_refrash"
+                android:layout_margin="10dp"
                 android:text="功能复位"
                 />
         </RelativeLayout>
@@ -317,12 +431,39 @@
             android:layout_marginTop="20dp"
             android:layout_marginLeft="20dp"
             />
+
         <Button
             android:id="@+id/bt_cup_back"
             android:layout_below="@+id/tv_coffe_cup"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="杯子回到原点"
+            android:layout_margin="10dp"
+            />
+        <Button
+            android:id="@+id/tv_coffe_ddlg"
+            android:layout_below="@+id/bt_cup_back"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点动落盖"
+            android:layout_margin="10dp"
+            />
+        <Button
+            android:id="@+id/tv_coffe_ddyg"
+            android:layout_below="@+id/bt_cup_back"
+            android:layout_toRightOf="@+id/tv_coffe_ddlg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点动压盖"
+            android:layout_margin="10dp"
+            />
+        <Button
+            android:id="@+id/tv_coffe_zdyg"
+            android:layout_below="@+id/bt_cup_back"
+            android:layout_toRightOf="@+id/tv_coffe_ddyg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自动落盖/压盖"
             android:layout_margin="10dp"
             />
         <Button
@@ -352,22 +493,23 @@
             android:text="落杯"
             android:layout_margin="10dp"
             />
+
         <Button
-            android:id="@+id/bt_cup_lg"
+            android:id="@+id/bt_cup_lgwz"
             android:layout_below="@+id/tv_coffe_cup"
             android:layout_toRightOf="@+id/bt_cup_lb"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="落盖"
+            android:text="杯子落盖位置"
             android:layout_margin="10dp"
             />
         <Button
-            android:id="@+id/bt_cup_lgwz"
+            android:id="@+id/bt_cup_dcf"
             android:layout_below="@+id/tv_coffe_cup"
-            android:layout_toRightOf="@+id/bt_cup_lg"
+            android:layout_toRightOf="@+id/bt_cup_lgwz"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="杯子落盖位置"
+            android:text="取杯口电磁铁"
             android:layout_margin="10dp"
             />
     </RelativeLayout>
@@ -379,7 +521,7 @@
         android:background="@drawable/bg_shape_testbj"
         android:layout_marginLeft="30dp"
         android:layout_marginRight="30dp"
-        android:layout_marginTop="30dp"
+        android:layout_marginTop="20dp"
         >
         <TextView
             android:id="@+id/tv_coffe_jn"
@@ -399,7 +541,7 @@
             android:text="胶囊平台回到原点"
             android:layout_marginTop="20dp"
             android:layout_marginLeft="10dp"
-            android:layout_marginBottom="40dp"
+
             />
         <Button
             android:id="@+id/bt_cup_go1"
@@ -456,6 +598,110 @@
             android:layout_marginLeft="10dp"
             android:layout_marginBottom="40dp"
             />
+        <Button
+            android:id="@+id/bt_cup_lddd"
+            android:layout_below="@+id/bt_cup_jnback"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="履带点动"
+            android:layout_margin="10dp"
+            />
+        <Button
+            android:id="@+id/bt_cup_ldcd"
+            android:layout_below="@+id/bt_cup_jnback"
+            android:layout_toRightOf="@+id/bt_cup_lddd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="履带长动"
+            android:layout_margin="10dp"
+            />
+        <Button
+            android:id="@+id/bt_cup_ldzd"
+            android:layout_below="@+id/bt_cup_jnback"
+            android:layout_toRightOf="@+id/bt_cup_ldcd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="履带转动"
+            android:layout_margin="10dp"
+            />
+        <TextView
+            android:id="@+id/tv_hd_xz1"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="当前货道:"
+            android:textSize="18sp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="30dp"
+            android:gravity="center"
+            android:layout_below="@+id/bt_cup_jnback"
+            android:layout_toRightOf="@+id/bt_cup_ldzd"
+            />
+        <TextView
+            android:id="@+id/tv_hd_xz"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:text="1"
+            android:textSize="18sp"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="5dp"
+            android:gravity="center"
+            android:layout_below="@+id/bt_cup_jnback"
+            android:layout_toRightOf="@+id/tv_hd_xz1"
+            />
+        <TextView
+            android:id="@+id/tv_hd_11"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="1"
+            android:textSize="18sp"
+            android:background="@color/color_gray2"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="30dp"
+            android:gravity="center"
+            android:layout_below="@+id/bt_cup_jnback"
+            android:layout_toRightOf="@+id/tv_hd_xz"
+            />
+        <TextView
+            android:id="@+id/tv_hd_21"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="2"
+            android:layout_toRightOf="@+id/tv_hd_11"
+            android:textSize="18sp"
+            android:background="@color/color_gray2"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:gravity="center"
+            android:layout_below="@+id/bt_cup_jnback"
+            />
+        <TextView
+            android:id="@+id/tv_hd_31"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="3"
+            android:layout_toRightOf="@+id/tv_hd_21"
+            android:textSize="18sp"
+            android:background="@color/color_gray2"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:gravity="center"
+            android:layout_below="@+id/bt_cup_jnback"
+
+            />
+        <TextView
+            android:id="@+id/tv_hd_41"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:text="4"
+            android:layout_toRightOf="@+id/tv_hd_31"
+            android:textSize="18sp"
+            android:background="@color/color_gray2"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:gravity="center"
+            android:layout_below="@+id/bt_cup_jnback"
+            />
+
     </RelativeLayout>
     <RelativeLayout
         android:id="@+id/rl_coffe_jntd"
@@ -471,40 +717,88 @@
             android:id="@+id/tv_coffe_jntd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="胶囊通道测试"
+            android:text="加热模块测试"
             android:textColor="@color/black"
             android:textSize="20sp"
             android:layout_marginTop="20dp"
             android:layout_marginLeft="20dp"
             />
-
         <Button
-            android:id="@+id/bt_cup_lddd"
+            android:id="@+id/bt_cup_ddcs"
             android:layout_below="@+id/tv_coffe_jntd"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="履带点动"
-            android:layout_margin="20dp"
+            android:text="点动抽水"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
             />
         <Button
-            android:id="@+id/bt_cup_ldcd"
+            android:id="@+id/bt_cup_dddcf"
             android:layout_below="@+id/tv_coffe_jntd"
-            android:layout_toRightOf="@+id/bt_cup_lddd"
+            android:layout_toRightOf="@+id/bt_cup_ddcs"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="履带长动"
-            android:layout_margin="20dp"
+            android:text="点动电磁阀"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
             />
         <Button
-            android:id="@+id/bt_cup_ldzd"
+            android:id="@+id/bt_cup_dddy1"
             android:layout_below="@+id/tv_coffe_jntd"
-            android:layout_toRightOf="@+id/bt_cup_ldcd"
+            android:layout_toRightOf="@+id/bt_cup_dddcf"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="履带转动"
-            android:layout_margin="20dp"
+            android:text="点动低压水泵1"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
             />
-
+        <Button
+            android:id="@+id/bt_cup_dddy2"
+            android:layout_below="@+id/tv_coffe_jntd"
+            android:layout_toRightOf="@+id/bt_cup_dddy1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="点动低压水泵2"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            />
+        <Button
+            android:id="@+id/bt_cup_st"
+            android:layout_below="@+id/tv_coffe_jntd"
+            android:layout_toRightOf="@+id/bt_cup_dddy2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="水桶切换"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            />
+        <Button
+            android:id="@+id/bt_cup_glzd"
+            android:layout_below="@+id/tv_coffe_jntd"
+            android:layout_toRightOf="@+id/bt_cup_st"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="锅炉自动加热"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            />
+        <Button
+            android:id="@+id/bt_cup_glsd"
+            android:layout_below="@+id/tv_coffe_jntd"
+            android:layout_toRightOf="@+id/bt_cup_glzd"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="锅炉点动加热"
+            android:layout_marginTop="20dp"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="10dp"
+            />
     </RelativeLayout>
         <TextView
         android:id="@+id/tv_test_num"

@@ -92,7 +92,7 @@ public class SerialPortUtil {
 //            byte[] buf = new byte[2];
 //            buf[0]=0x01;
 //            buf[1]=0x02;
-            Log.e("sent","hex发送串口数据-->"+buf.toString());
+            Log.e("sent","hex发送串口数据-->"+data);
             outputStream.write(buf);
             outputStream.flush();
 

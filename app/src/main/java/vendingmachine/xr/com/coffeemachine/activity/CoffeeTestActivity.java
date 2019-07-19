@@ -28,6 +28,7 @@ import java.util.List;
 import vendingmachine.xr.com.coffeemachine.R;
 import vendingmachine.xr.com.coffeemachine.adapter.CoffeTestAdapter;
 import vendingmachine.xr.com.coffeemachine.application.MyApplication;
+import vendingmachine.xr.com.coffeemachine.pojo.goods;
 import vendingmachine.xr.com.coffeemachine.utils.AryChangeManager;
 import vendingmachine.xr.com.coffeemachine.utils.SerialPortUtil;
 
@@ -41,14 +42,24 @@ public class CoffeeTestActivity extends AppCompatActivity {
     2：胶囊平台移到2货到
     3：胶囊平台移到3货到
     4：胶囊平台移到4货到
-    5：胶囊平台移动到酿造组*/
-    Button bt_cup_jnback,bt_cup_go1,bt_cup_go2,bt_cup_go3,bt_cup_go4,bt_cup_make,bt_cup_lgwz;
+    5：胶囊平台移动到酿造组
+    6: 取杯口电磁铁
+    */
+
+    Button bt_cup_jnback,bt_cup_go1,bt_cup_go2,bt_cup_go3,bt_cup_go4,bt_cup_make,bt_cup_lgwz,bt_cup_dcf;
+    Button tv_coffe_ddlg,tv_coffe_ddyg,tv_coffe_zdyg;
+    Button bt_cup_ddcs,bt_cup_dddcf,bt_cup_dddy1,bt_cup_dddy2,bt_cup_st,bt_cup_glzd,bt_cup_glsd;
     static TextView tv_coofe_type ;
     static TextView tv_test_num,tv_test_mes;
+    TextView tv_hd_xz;
     public static boolean running = false;
     Button bt_cup_lddd,bt_cup_ldcd,bt_cup_ldzd,bt_cup_cjn;
     RecyclerView rv_gy ;
     CoffeTestAdapter coffeTestAdapter;
+    TextView tv_cup_szwd,tv_cup_szll;//当前设置温度，当前设置流量
+    EditText et_cup_sdwd,et_cup_sdll;//设置温度,设置流量
+    TextView tv_cup_sjwd,tv_cup_sjll;//当前温度,当前流量
+    Button bt_cup_bc;//保存
     List<String> list;
     String data1;
     int [] size = new int[]{1,1,1,0,1,0,1,1,0,1,1,1,0,1,1,1,1,1,0,1};
@@ -73,37 +84,287 @@ public class CoffeeTestActivity extends AppCompatActivity {
         rv_gy.setLayoutManager(new GridLayoutManager(this,5));
         coffeTestAdapter = new CoffeTestAdapter(this,list);
         rv_gy.setAdapter(coffeTestAdapter);
+        coffeTestAdapter.SetOnItemClick(new CoffeTestAdapter.OnItemClickListener() {
+            @Override
+            public void onItemClick(View view, int hp, int hd) {
+
+                    String i2 = AryChangeManager.dexToHex(0x32  ^0x06 ^ 0x04 ^0x03 ^ 0x04  ^ hd ^ hp);
+                    String str = "32" + "00" + "06" + "04" + "03" + "04" + "0"+hd + "0"+hp + i2;
+                    Log.e("test", "onClick: " + str + "---------" + i2);
+                    SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                    getTime();
+                    addText(tv_test_num,data1+" :  出胶囊");
+                    addText(tv_test_num,data1+" :  发送内容：--->"+str);
+
+            }
+
+            @Override
+            public void onLongItemClick(View view, int hp, int hd) {
+                String temp = tv_cup_szwd.getText().toString().trim();
+                String water = tv_cup_szll.getText().toString().trim();
+                String waterHeight = Integer.toHexString(Integer.valueOf(water)/256);
+                String waterLow = Integer.toHexString(Integer.valueOf(water)%256);
+                String i2 = AryChangeManager.dexToHex(0x32 ^  0x02 ^5^ hd ^ hp ^ Integer.valueOf(temp,16) ^Integer.valueOf(waterHeight,16)^Integer.valueOf(waterLow,16) );
+                String str = "32" + "00" + "02" + "05"+"0"+hp + "0"+hd +temp+"0"+waterHeight+waterLow + i2;
+                Log.e("testDDDD", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  制作饮料");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
         Log.e("ZZZZZZZZZAAAAAAA", "onCreate: -->"+coffeTestAdapter.getItemCount() );
         tv_test_num =findViewById(R.id.tv_test_num);
         et_hd = findViewById(R.id.et_hd);
         et_hp = findViewById(R.id.et_hp);
+        tv_cup_szwd = findViewById(R.id.tv_cup_szwd);
+        tv_cup_szll = findViewById(R.id.tv_cup_szll);
         tv_test_mes =findViewById(R.id.tv_test_mes);
-        TextView tv_hd_1 = findViewById(R.id.tv_hd_1);
+        et_cup_sdwd = findViewById(R.id.et_cup_sdwd);
+        et_cup_sdll = findViewById(R.id.et_cup_sdll);
+        tv_cup_sjwd = findViewById(R.id.tv_cup_sjwd);
+        tv_cup_sjll = findViewById(R.id.tv_cup_sjll);
+
+        /*】
+        * 保存流量
+        * */
+        bt_cup_bc = findViewById(R.id.bt_cup_bc);
+        bt_cup_bc.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String temp = et_cup_sdwd.getText().toString().trim();
+                String water = et_cup_sdll .getText().toString().trim();
+                if (!TextUtils.isEmpty(temp)&&!TextUtils.isEmpty(water)){
+                    if (Integer.valueOf(temp)>0&&Integer.valueOf(temp)<=100){
+                        if (Integer.valueOf(water)>=100&&Integer.valueOf(water)<=500){
+                            tv_cup_szwd.setText(temp);
+                            tv_cup_szll.setText(water);
+                        }else {
+                            Toast.makeText(CoffeeTestActivity.this, "流量应在100—500之间", Toast.LENGTH_SHORT).show();
+                        }
+                    }else {
+                        Toast.makeText(CoffeeTestActivity.this, "温度应在0—100之间", Toast.LENGTH_SHORT).show();
+                    }
+
+                }else {
+                    Toast.makeText(CoffeeTestActivity.this, "温度和流量不能为空", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+
+        /*
+        * 新加 取杯口电磁
+        * */
+        bt_cup_dcf = findViewById(R.id.bt_cup_dcf);
+        bt_cup_dcf.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x01^0x04^0^0);
+                String str = "32" + "00" + "06" + "04" + "01" + "04" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  启动/断开取杯口电磁铁");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+
+        /*
+        * x新加  点动落盖
+        * */
+        tv_coffe_ddlg = findViewById(R.id.tv_coffe_ddlg);
+        tv_coffe_ddlg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x06^0^0^0);
+                String str = "32" + "00" + "06" + "04" + "06" + "00" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  点动落盖");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+
+        /*
+        * 点动  压杯盖
+        * */
+        tv_coffe_ddyg = findViewById(R.id.tv_coffe_ddyg);
+        tv_coffe_ddyg .setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x06^0x01^0^0);
+                String str = "32" + "00" + "06" + "04" + "06" + "01" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  点动压盖");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+
+        /*
+        * 新加  自动落杯落盖
+         * */
+        tv_coffe_zdyg = findViewById(R.id.tv_coffe_zdyg);
+        tv_coffe_zdyg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x06^0x02^0^0);
+                String str = "32" + "00" + "06" + "04" + "06" + "02" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  自动落盖 /压盖");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+
+        /*
+        * 新加 点动抽水
+        * */
+        bt_cup_ddcs = findViewById(R.id.bt_cup_ddcs);
+        bt_cup_ddcs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x07^0^0^0);
+                String str = "32" + "00" + "06" + "04" + "07" + "00" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  点动抽水");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+
+        /*
+        * 新加点动电磁阀
+        *
+        * */
+        bt_cup_dddcf = findViewById(R.id.bt_cup_dddcf);
+        bt_cup_dddcf .setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x07^0x01^0^0);
+                String str = "32" + "00" + "06" + "04" + "07" + "01" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  点动电磁阀");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+
+        /*
+        * 新加  点动低压水箱1
+        * */
+        bt_cup_dddy1 = findViewById(R.id.bt_cup_dddy1);
+        bt_cup_dddy1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x07^0x02^0^0);
+                String str = "32" + "00" + "06" + "04" + "07" + "02" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  点动低压水箱1");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+
+        /*
+        * X新加  点动低压水箱2
+        * */
+        bt_cup_dddy2 = findViewById(R.id.bt_cup_dddy2);
+        bt_cup_dddy2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x07^0x03^0^0);
+                String str = "32" + "00" + "06" + "04" + "07" + "03" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  点动低压水箱2");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+        /*
+        * X新加  切换水箱
+        * */
+        bt_cup_st = findViewById(R.id.bt_cup_st);
+        bt_cup_st.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x07^0x04^0^0);
+                String str = "32" + "00" + "06" + "04" + "07" + "04" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  水桶切换");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+
+        /*
+        * 新加 锅炉自动加热
+        * */
+        bt_cup_glzd = findViewById(R.id.bt_cup_glzd);
+        bt_cup_glzd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x07^0x05^0^0);
+                String str = "32" + "00" + "06" + "04" + "07" + "05" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  锅炉自动加热");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+        /*
+         * 新加 锅炉手动加热
+         * */
+        bt_cup_glsd = findViewById(R.id.bt_cup_glsd);
+        bt_cup_glsd.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x07^0x06^0^0);
+                String str = "32" + "00" + "06" + "04" + "07" + "06" +"00"+"00" + i2;
+                Log.e("test", "onClick: " + str+"---------"+i2);
+                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+                getTime();
+                addText(tv_test_num,data1+" :  锅炉点动加热");
+                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+            }
+        });
+        tv_hd_xz = findViewById(R.id.tv_hd_xz);
+        TextView tv_hd_1 = findViewById(R.id.tv_hd_11);
         tv_hd_1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                et_hd.setText("1");
+                tv_hd_xz.setText("1");
             }
         });
-        TextView tv_hd_2 = findViewById(R.id.tv_hd_2);
+
+        TextView tv_hd_2 = findViewById(R.id.tv_hd_21);
         tv_hd_2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                et_hd.setText("2");
+                tv_hd_xz.setText("2");
             }
         });
-        TextView tv_hd_3 = findViewById(R.id.tv_hd_3);
+        TextView tv_hd_3 = findViewById(R.id.tv_hd_31);
         tv_hd_3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                et_hd.setText("3");
+                tv_hd_xz.setText("3");
             }
         });
-        TextView tv_hd_4= findViewById(R.id.tv_hd_4);
+        TextView tv_hd_4= findViewById(R.id.tv_hd_41);
         tv_hd_4.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                et_hd.setText("4");
+                tv_hd_xz.setText("4");
             }
         });
         TextView tv_hp_1= findViewById(R.id.tv_hp_1);
@@ -198,19 +459,19 @@ public class CoffeeTestActivity extends AppCompatActivity {
                 addText(tv_test_num,data1+" :  发送内容：--->"+str);
             }
         });
-        bt_cup_lg = findViewById(R.id.bt_cup_lg);
-        bt_cup_lg.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x01^0x04^0^0);
-                String str = "32" + "00" + "06" + "04" + "01" + "04" +"00"+"00" + i2;
-                Log.e("test", "onClick: " + str+"---------"+i2);
-                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
-                getTime();
-                addText(tv_test_num,data1+" :  落盖");
-                addText(tv_test_num,data1+" :  发送内容：--->"+str);
-            }
-        });
+//        bt_cup_lg = findViewById(R.id.bt_cup_lg);
+//        bt_cup_lg.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String i2 = AryChangeManager.dexToHex(0x32^0^ 0x06 ^ 0x04 ^ 0x01^0x04^0^0);
+//                String str = "32" + "00" + "06" + "04" + "01" + "04" +"00"+"00" + i2;
+//                Log.e("test", "onClick: " + str+"---------"+i2);
+//                SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+//                getTime();
+//                addText(tv_test_num,data1+" :  落盖");
+//                addText(tv_test_num,data1+" :  发送内容：--->"+str);
+//            }
+//        });
         bt_cup_lgwz = findViewById(R.id.bt_cup_lgwz);
         bt_cup_lgwz.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -312,7 +573,7 @@ public class CoffeeTestActivity extends AppCompatActivity {
         bt_cup_lddd.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                String x =et_hd.getText().toString().trim();
+                String x =tv_hd_xz.getText().toString().trim();
                 if (!TextUtils.isEmpty(x)) {
                 int Xaxis = Integer.valueOf(x, 16);
                 String i2 = AryChangeManager.dexToHex(0x32^0x06 ^ 0x04 ^ 0x03^0x01^Xaxis);
@@ -346,7 +607,7 @@ public class CoffeeTestActivity extends AppCompatActivity {
         bt_cup_ldcd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String x =et_hd.getText().toString().trim();
+                String x =tv_hd_xz.getText().toString().trim();
 
                 if (!TextUtils.isEmpty(x)) {
                     int Xaxis = Integer.valueOf(x, 16);
@@ -367,7 +628,7 @@ public class CoffeeTestActivity extends AppCompatActivity {
         bt_cup_ldzd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String x =et_hd.getText().toString().trim();
+                String x =tv_hd_xz.getText().toString().trim();
 
                 if (!TextUtils.isEmpty(x)){
                     int Xaxis = Integer.valueOf(x,16);
@@ -383,35 +644,35 @@ public class CoffeeTestActivity extends AppCompatActivity {
                 }
             }
         });
-
-        bt_cup_cjn = findViewById(R.id.bt_cup_cjn);
-        bt_cup_cjn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String x =et_hd.getText().toString().trim();
-                String y =et_hp.getText().toString().trim();
-                Log.e("SSSSSSSS", "onClick: -->"+x+"....."+y );
-                if (!TextUtils.isEmpty(x)&&!TextUtils.isEmpty(y)) {
-
-//                   int Xaxis = AryChangeManager.stringToHex(x)[0];
-//                   int Yaxis= AryChangeManager.stringToHex(y)[0];
-                    int Xaxis = Integer.valueOf(x,16);
-                    int Yaxis= Integer.valueOf(y,16);
-                    Log.e("SSSSSSSS1111", "onClick: -->"+Xaxis+"....."+Yaxis );
-                    if (Xaxis != -1 && Yaxis != -1) {
-                        String i2 = AryChangeManager.dexToHex(0x32  ^0x06 ^ 0x04 ^0x03 ^ 0x04  ^ Xaxis ^ Yaxis);
-                        String str = "32" + "00" + "06" + "04" + "03" + "04" + "0"+x + "0"+y + i2;
-                        Log.e("test", "onClick: " + str + "---------" + i2);
-                        SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
-                        getTime();
-                        addText(tv_test_num,data1+" :  出胶囊");
-                        addText(tv_test_num,data1+" :  发送内容：--->"+str);
-                    }
-                }else {
-                    Toast.makeText(CoffeeTestActivity.this, "请输入货盘和货道", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+//
+//        bt_cup_cjn = findViewById(R.id.bt_cup_cjn);
+//        bt_cup_cjn.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String x =et_hd.getText().toString().trim();
+//                String y =et_hp.getText().toString().trim();
+//                Log.e("SSSSSSSS", "onClick: -->"+x+"....."+y );
+//                if (!TextUtils.isEmpty(x)&&!TextUtils.isEmpty(y)) {
+//
+////                   int Xaxis = AryChangeManager.stringToHex(x)[0];
+////                   int Yaxis= AryChangeManager.stringToHex(y)[0];
+//                    int Xaxis = Integer.valueOf(x,16);
+//                    int Yaxis= Integer.valueOf(y,16);
+//                    Log.e("SSSSSSSS1111", "onClick: -->"+Xaxis+"....."+Yaxis );
+//                    if (Xaxis != -1 && Yaxis != -1) {
+//                        String i2 = AryChangeManager.dexToHex(0x32  ^0x06 ^ 0x04 ^0x03 ^ 0x04  ^ Xaxis ^ Yaxis);
+//                        String str = "32" + "00" + "06" + "04" + "03" + "04" + "0"+x + "0"+y + i2;
+//                        Log.e("test", "onClick: " + str + "---------" + i2);
+//                        SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+//                        getTime();
+//                        addText(tv_test_num,data1+" :  出胶囊");
+//                        addText(tv_test_num,data1+" :  发送内容：--->"+str);
+//                    }
+//                }else {
+//                    Toast.makeText(CoffeeTestActivity.this, "请输入货盘和货道", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
         Button bt_cup_clean = findViewById(R.id.bt_cup_clean);
         bt_cup_clean.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -436,33 +697,33 @@ public class CoffeeTestActivity extends AppCompatActivity {
             }
         });
         /*制作饮料*/
-        Button bt_make_coffe = findViewById(R.id.bt_make_coffe);
-        bt_make_coffe.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (isWell){
-                String x =et_hd.getText().toString().trim();
-                String y =et_hp.getText().toString().trim();
-                if (!TextUtils.isEmpty(x)&&!TextUtils.isEmpty(y)){
-                    int Xaxis = Integer.valueOf(x,16);
-                    int Yaxis= Integer.valueOf(y,16);
-                if (Xaxis!=-1&&Yaxis!=-1){
-                    String i2 = AryChangeManager.dexToHex(0x32  ^ 0x02 ^0x02^Xaxis^Yaxis^0x50^0x96 );
-                    String str = "32" + "00" + "02" + "02"+"0"+x + "0"+y+"50"+"00"+96 + i2;
-                    Log.e("testDDDD", "onClick: " + str+"---------"+i2);
-                    SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
-                    getTime();
-                    addText(tv_test_num,data1+" :  制作饮料");
-                    addText(tv_test_num,data1+" :  发送内容：--->"+str);
-                }
-                }else {
-                    Toast.makeText(CoffeeTestActivity.this,"请输入货盘和货道",Toast.LENGTH_SHORT).show();
-                }
-                }else {
-                    Toast.makeText(CoffeeTestActivity.this,"有故障无法执行",Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+//        Button bt_make_coffe = findViewById(R.id.bt_make_coffe);
+//        bt_make_coffe.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                if (isWell){
+//                String x =et_hd.getText().toString().trim();
+//                String y =et_hp.getText().toString().trim();
+//                if (!TextUtils.isEmpty(x)&&!TextUtils.isEmpty(y)){
+//                    int Xaxis = Integer.valueOf(x,16);
+//                    int Yaxis= Integer.valueOf(y,16);
+//                if (Xaxis!=-1&&Yaxis!=-1){
+//                    String i2 = AryChangeManager.dexToHex(0x32  ^ 0x02 ^0x02^Xaxis^Yaxis^0x50^0x96 );
+//                    String str = "32" + "00" + "02" + "02"+"0"+x + "0"+y+"50"+"00"+96 + i2;
+//                    Log.e("testDDDD", "onClick: " + str+"---------"+i2);
+//                    SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
+//                    getTime();
+//                    addText(tv_test_num,data1+" :  制作饮料");
+//                    addText(tv_test_num,data1+" :  发送内容：--->"+str);
+//                }
+//                }else {
+//                    Toast.makeText(CoffeeTestActivity.this,"请输入货盘和货道",Toast.LENGTH_SHORT).show();
+//                }
+//                }else {
+//                    Toast.makeText(CoffeeTestActivity.this,"有故障无法执行",Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//        });
 
         Button bt_coffe_fw = findViewById(R.id.bt_coffe_fw);
         bt_coffe_fw.setOnClickListener(new View.OnClickListener() {

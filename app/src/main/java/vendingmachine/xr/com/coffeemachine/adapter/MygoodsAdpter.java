@@ -4,6 +4,9 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -95,8 +98,12 @@ public class MygoodsAdpter  extends RecyclerView.Adapter<MyViewHolder> {
 //
 //        });
         hasgood= mDatas.get(position).getHasGoods();
+////        if (position==1){
+            hasgood=1;
+////        }
         if (hasgood==0){
             holder.tv_buy_bh.setVisibility(View.VISIBLE);
+            holder.iv_goods.setColorFilter( Color.parseColor("#bbbbbb"),PorterDuff.Mode.SCREEN);
             holder.tv_bz1.setVisibility(View.GONE);
             holder.tv_buy_price.setVisibility(View.GONE);
             holder.iv_goods.setOnClickListener(new View.OnClickListener() {
@@ -108,6 +115,7 @@ public class MygoodsAdpter  extends RecyclerView.Adapter<MyViewHolder> {
         }else {
             holder.tv_buy_bh.setVisibility(View.GONE);
             holder.tv_bz1.setVisibility(View.VISIBLE);
+            holder.iv_goods.setColorFilter( Color.TRANSPARENT);
             holder.tv_buy_price.setVisibility(View.VISIBLE);
             holder.iv_goods.setOnClickListener(new View.OnClickListener() {
                 @Override

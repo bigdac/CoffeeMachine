@@ -2,6 +2,7 @@ package vendingmachine.xr.com.coffeemachine.activity;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +10,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -22,6 +24,9 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewTreeObserver;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.Toast;
@@ -57,10 +62,16 @@ public class FirstActivity extends AppCompatActivity  {
     Button bt_first_qh ;
     int isPicture = 1;
     String szImei;
+    int mHeight = 0 ;
+
+    private boolean mLayoutComplete = false;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        secondHide();
+
         setContentView(R.layout.activity_first);
+        hideBottomUIMenu();
         preferences = getSharedPreferences("my",MODE_PRIVATE);
         adDaoImp = new ADDaoImp(getApplicationContext());
         application= (MyApplication) getApplication();
@@ -125,6 +136,37 @@ public class FirstActivity extends AppCompatActivity  {
         registerReceiver(myBRReceiver, itFilter);
 //        hidebottomuimenu();
     }
+
+
+    public void secondHide() {
+        int flags = getWindow().getDecorView().getSystemUiVisibility();
+        getWindow().getDecorView().setSystemUiVisibility(flags | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE);
+
+
+
+    }
+
+
+
+    /**
+     * 隐藏虚拟按键，并且全屏
+     */
+    protected void hideBottomUIMenu() {
+        //隐藏虚拟按键，并且全屏
+        if (Build.VERSION.SDK_INT > 11 && Build.VERSION.SDK_INT < 19) { // lower api
+            View v = this.getWindow().getDecorView();
+            v.setSystemUiVisibility(View.GONE);
+        } else if (Build.VERSION.SDK_INT >= 19) {
+            //for new api versions.
+            View decorView = getWindow().getDecorView();
+            int uiOptions = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY | View.SYSTEM_UI_FLAG_FULLSCREEN;
+            decorView.setSystemUiVisibility(uiOptions);
+        }
+    }
+
 
     public void stopBuyGoods (){
         frameLayout1.setVisibility(View.GONE);
@@ -247,6 +289,8 @@ public class FirstActivity extends AppCompatActivity  {
 
 
     MyBRReceiver myBRReceiver;
+
+
 
     /*复写跟换bnner图片*/
 //    @Override
@@ -622,5 +666,6 @@ public class FirstActivity extends AppCompatActivity  {
         }
         if (countDownTimer != null)
             countDownTimer.cancel();
+
     }
 }

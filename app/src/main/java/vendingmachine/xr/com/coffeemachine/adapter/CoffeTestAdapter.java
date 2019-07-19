@@ -16,7 +16,7 @@ import vendingmachine.xr.com.coffeemachine.R;
 public class CoffeTestAdapter extends RecyclerView.Adapter<CoffeTestAdapter.MyViewHolder> {
     private  Context context;
     private  List<String> mData;
-
+    private  OnItemClickListener onItemClickListener;
     public CoffeTestAdapter(Context context, List<String> list){
             this.context = context;
             this.mData = list;
@@ -26,12 +26,14 @@ public class CoffeTestAdapter extends RecyclerView.Adapter<CoffeTestAdapter.MyVi
     public  MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         return new MyViewHolder(LayoutInflater.from(context).inflate(R.layout.item_coffetest,parent,false));
     }
-
+    int hp;
+    int hd;
     @Override
-    public void onBindViewHolder( MyViewHolder holder, int position) {
+    public void onBindViewHolder(MyViewHolder holder, final int position) {
 //            holder.tv_coffe_num.setText(position+1+"");
         if(position<5){
             holder.tv_coffe_num.setText("1-"+(position+1));
+
         }else if (position>=5&&position<10){
             holder.tv_coffe_num.setText("2-"+(position-4));
         }else if (position>=10&&position<15){
@@ -45,6 +47,56 @@ public class CoffeTestAdapter extends RecyclerView.Adapter<CoffeTestAdapter.MyVi
             }else if ("0".equals(mData.get(position) )){
                 holder.rl_coffe.setBackgroundColor(context.getResources().getColor(R.color.red_normal));
             }
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(position<5){
+                    hd = 1 ;
+                    hp = position+1;
+                }else if (position>=5&&position<10){
+                    hd = 2 ;
+                    hp = position-4;
+                }else if (position>=10&&position<15){
+                    hd = 3 ;
+                    hp = position-9;
+
+                }else {
+                    hd = 4 ;
+                    hp = position-14;
+                }
+                onItemClickListener.onItemClick(v,hp,hd);
+            }
+        });
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                if(position<5){
+                    hd = 1 ;
+                    hp = position+1;
+                }else if (position>=5&&position<10){
+                    hd = 2 ;
+                    hp = position-4;
+                }else if (position>=10&&position<15){
+                    hd = 3 ;
+                    hp = position-9;
+
+                }else {
+                    hd = 4 ;
+                    hp = position-14;
+                }
+                onItemClickListener.onLongItemClick(v,hp,hd);
+                return true;
+            }
+        });
+    }
+
+    public   interface  OnItemClickListener {
+        void onItemClick(View view,int hp ,int hd);
+        void onLongItemClick(View view , int hp ,int hd);
+
+    }
+    public void SetOnItemClick( OnItemClickListener onItemClickListener){
+        this.onItemClickListener = onItemClickListener ;
     }
 
     @Override
@@ -61,5 +113,8 @@ public class CoffeTestAdapter extends RecyclerView.Adapter<CoffeTestAdapter.MyVi
             tv_coffe_num = itemView.findViewById(R.id.tv_coffe_num);
         }
     }
+
+    interface  setOncLicked{}
+
 
 }

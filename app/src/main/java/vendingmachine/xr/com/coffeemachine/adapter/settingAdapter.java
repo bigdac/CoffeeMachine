@@ -187,11 +187,15 @@ public class settingAdapter extends RecyclerView.Adapter<settingAdapter.MyViewHo
                 public void onClick(View v) {
                     String water  = holder.et_set_ll.getText().toString().trim();
                     if (!TextUtils.isEmpty(water)){
+                        if (Integer.valueOf(water)>=100&&Integer.valueOf(water)<=500) {
                         SaleGoods saleGoods = mData.get(position);
                         saleGoods.setWaterQuantity(Integer.valueOf(water));
                         holder.tv_set_ll.setText("流量:"+mData.get(position).getWaterQuantity()+"ml");
                         saleGoodsDaoImp.update(saleGoods);
                         Toast.makeText(context,"流量设置成功",Toast.LENGTH_SHORT).show();
+                    }else {
+                        Toast.makeText(context,"流量在100-500之间",Toast.LENGTH_SHORT).show();
+                     }
                     }else {
                         Toast.makeText(context,"请先填写出水量",Toast.LENGTH_SHORT).show();
                     }
@@ -203,11 +207,16 @@ public class settingAdapter extends RecyclerView.Adapter<settingAdapter.MyViewHo
                 public void onClick(View v) {
                     String temperature  = holder.et_set_wd.getText().toString().trim();
                     if (!TextUtils.isEmpty(temperature)){
-                        SaleGoods saleGoods = mData.get(position);
-                        saleGoods.setTemperature(Integer.valueOf(temperature));
-                        holder.tv_set_wd.setText("温度："+mData.get(position).getTemperature()+"℃");
-                        Toast.makeText(context,"温度设置成功",Toast.LENGTH_SHORT).show();
-                        saleGoodsDaoImp.update(saleGoods);
+                        if (Integer.valueOf(temperature)>0&&Integer.valueOf(temperature)<=100) {
+                            SaleGoods saleGoods = mData.get(position);
+                            saleGoods.setTemperature(Integer.valueOf(temperature));
+                            holder.tv_set_wd.setText("温度：" + mData.get(position).getTemperature() + "℃");
+                            Toast.makeText(context, "温度设置成功", Toast.LENGTH_SHORT).show();
+                            saleGoodsDaoImp.update(saleGoods);
+                        }else {
+                            Toast.makeText(context,"温度在0-100之间",Toast.LENGTH_SHORT).show();
+                        }
+
                     }else {
                         Toast.makeText(context,"请先填写温度",Toast.LENGTH_SHORT).show();
                     }
@@ -239,7 +248,7 @@ public class settingAdapter extends RecyclerView.Adapter<settingAdapter.MyViewHo
               saleGoods.setGoodsId(goodsId);
               saleGoods.setGoodsNum(0);
               saleGoods.setTemperature(75);
-              saleGoods.setWaterQuantity(150);
+              saleGoods.setWaterQuantity(280);
               mData.set(pos,saleGoods);
               saleGoodsDaoImp.update(saleGoods);
               dialog.dismiss();

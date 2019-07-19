@@ -47,6 +47,7 @@ import vendingmachine.xr.com.coffeemachine.fragment.BuyFragment;
 import vendingmachine.xr.com.coffeemachine.pojo.Order;
 import vendingmachine.xr.com.coffeemachine.utils.AryChangeManager;
 import vendingmachine.xr.com.coffeemachine.utils.SerialPortUtil;
+import vendingmachine.xr.com.coffeemachine.utils.SerialPortUtil1;
 
 public class MQService extends Service {
 
@@ -91,6 +92,8 @@ public class MQService extends Service {
         try {
             SerialPortUtil.openSerialPort(this, "ttyO3", 38400, 8, 1, 'N');
             SerialPortUtil.receiveSerialPort(mContext);
+            SerialPortUtil1.openSerialPort(this, "ttyO2", 9600, 8, 1, 'N');
+            SerialPortUtil1.receiveSerialPort(mContext);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -119,7 +122,7 @@ public class MQService extends Service {
     }
 
     DownloadThread t;
-
+    int Dogtime=0;
     class DownloadThread extends Thread{
 
         @Override
@@ -131,7 +134,12 @@ public class MQService extends Service {
                     Thread.sleep(1000);
                     if (!isSto)
                     getState1();
-                    Log.e(TAG, "run: --->" );
+                    Dogtime++;
+                    if (Dogtime==60){
+                        SendToDog();
+                        Dogtime=0;
+                    }
+//                    Log.e(TAG, "run: --->" );
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -153,12 +161,21 @@ public class MQService extends Service {
 
         String i2 = AryChangeManager.dexToHex(x1 ^ x2 ^ c1 );
         String str = machineType + machineAdress + command1 + "00" +i2+"0000";
+
         Log.e("test", "onClick: " + str+"-----"+i2);
         if (isHexTransport) {
 
             SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
 
+
         }
+    }
+    public void  SendToDog(){
+        int Chk = (0xaa +0x01+0x52+0x20)%256;
+        String i2 = AryChangeManager.dexToHex(Chk);
+        String str1 = "AA"+"01"+52+20+i2;
+        SerialPortUtil1.sendHexSerialPort(AryChangeManager.stringToHex(str1));
+        Log.e("test3333", "onClick: " + str1+"-----"+i2);
     }
 
 
@@ -379,6 +396,12 @@ public class MQService extends Service {
                             Log.e("mess", "doInBackground: -->" );
                             sendBroadcast(mqttIntent);
                         }
+                    }else if (("coffee/"+szImei+"/app/feeddog").equals(topicName)){
+                        int Chk = (0xaa +0x02+0xFF)%256;
+                        String i2 = AryChangeManager.dexToHex(Chk);
+                        String str1 = "AA"+"02FF00" +i2;
+                        SerialPortUtil1.sendHexSerialPort(AryChangeManager.stringToHex(str1));
+                        Log.e("test3333", "onClick: " + str1+"-----"+i2);
                     }
 
 
@@ -467,6 +490,7 @@ public class MQService extends Service {
         topics.add("coffee/"+szImei+"/device/edit");//设备添加广告
         topics.add("coffee/"+szImei+"/commodity/delete");//删除货物
         topics.add("coffee/"+szImei+"/app/updata");//更新app
+        topics.add("coffee/"+szImei+"/app/feeddog");//电子狗重启
         topics.add(macAddress);
         return topics;
     }

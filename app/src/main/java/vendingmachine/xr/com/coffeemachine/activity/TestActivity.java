@@ -20,6 +20,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -78,6 +80,8 @@ public class TestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         SDKInitializer.initialize(getApplicationContext());//百度地图
         RegisterBroadcast();
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_test);
         application= (MyApplication) getApplication();
         application.addActivity(this);

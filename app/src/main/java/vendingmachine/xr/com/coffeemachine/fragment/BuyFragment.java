@@ -219,7 +219,7 @@ public class BuyFragment extends Fragment {
 //                tv_xq_number.setText("1");
                 i = 1;
 //                ((FirstActivity)getActivity()).startAD();
-                ((FirstActivity)getActivity()).stopBuyGoods();
+//                ((FirstActivity)getActivity()).stopBuyGoods();
 
             }
         });
@@ -230,6 +230,7 @@ public class BuyFragment extends Fragment {
         bt_buy_gm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                sendBuyMess();
                 if (Utils.isFastClick()) {
                         showProgressDialog("请稍候。。。。");
 //                    ((FirstActivity)getActivity()).stopAD();
@@ -481,8 +482,10 @@ public class BuyFragment extends Fragment {
                     goods goods= list_goods.get(posz);
                     SaleGoods saleGoods = saleGoodsDaoImp.findByHdHp(goods.getHd(),goods.getHp());
                     int goodsNum = saleGoods.getGoodsNum();
-                    saleGoods.setGoodsNum(goodsNum-1);
-                    saleGoodsDaoImp.update(saleGoods);
+                    if (goodsNum>0) {
+                        saleGoods.setGoodsNum(goodsNum - 1);
+                        saleGoodsDaoImp.update(saleGoods);
+                    }
                 }
                 ((FirstActivity)getActivity()).hideADpage();
                 hasgoodCount hasgoodCount = new hasgoodCount(3000,1000);

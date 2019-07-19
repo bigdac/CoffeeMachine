@@ -21,6 +21,7 @@
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
         <item name="colorPrimary">#3d3c38</item>
     </style>
     <style name="edit_AlertDialog_style" parent="@android:style/Theme.Dialog">
