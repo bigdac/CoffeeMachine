@@ -1,6 +1,7 @@
 package vendingmachine.xr.com.coffeemachine.activity;
 
 
+import android.annotation.SuppressLint;
 import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -39,6 +40,7 @@ public class DownloadActivity extends CheckPermissionsActivity {
     int sum = 0;
 
     TimerTask task;
+    @SuppressLint("HandlerLeak")
     Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {

@@ -402,10 +402,21 @@ public class MQService extends Service {
                         String str1 = "AA"+"02FF00" +i2;
                         SerialPortUtil1.sendHexSerialPort(AryChangeManager.stringToHex(str1));
                         Log.e("test3333", "onClick: " + str1+"-----"+i2);
+                    }else if ("coffee/update/transfer".equals(topicName)){
+                        messageJsonObject = new JSONObject(message);
+                        int mcuVersion=messageJsonObject.getInt("updateMCU");
+                        byte data[]=new byte[5];
+                        data[0]= (byte) 0xAA;
+                        data[1]=1;
+                        data[2]= (byte) mcuVersion;
+                        int sum=0;
+                        for (int i = 0; i < 3; i++) {
+                            sum+=data[i];
+                        }
+                        data[3]= (byte) (sum%256);
+                        data[4]=0x0A;
+                        SerialPortUtil.questUpdate(data);
                     }
-
-
-
                 }
             }catch (Exception e){
                 e.printStackTrace();
@@ -491,6 +502,7 @@ public class MQService extends Service {
         topics.add("coffee/"+szImei+"/commodity/delete");//删除货物
         topics.add("coffee/"+szImei+"/app/updata");//更新app
         topics.add("coffee/"+szImei+"/app/feeddog");//电子狗重启
+        topics.add("coffee/update/transfer");
         topics.add(macAddress);
         return topics;
     }

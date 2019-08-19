@@ -3,10 +3,7 @@ package vendingmachine.xr.com.coffeemachine.fragment;
 
 
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
+
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -71,16 +68,16 @@ public class MediaplayFragment extends Fragment {
         //检查vitamio框架是否可用
 
         mVideoView = (VideoView) view.findViewById(R.id.video);
-        String videoUrl1 = "mnt/sdcard/105.mp4" ;
-        String videoUrl2 = "mnt/sdcard/103.mp4" ;
+//        String videoUrl1 = "mnt/sdcard/105.mp4" ;
+//        String videoUrl2 = "mnt/sdcard/103.mp4" ;
 //        String videoUrl1 = "/storage/emulated/0/123.mp4" ;
 //        Log.e("path", "onCreateView: "+videoUrl1 );
-//        String videoUrl1 = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" ;
+        String videoUrl1 = "http://clips.vorwaerts-gmbh.de/big_buck_bunny.mp4" ;/*网络视频*/
 //        String videoUrl2 = "http://pde49x7hh.bkt.clouddn.com/abc.mp4" ;
 
 //         url = new String[]{videoUrl1,videoUrl1};
 
-         uri1 = Uri.parse( videoUrl2 );
+         uri1 = Uri.parse( videoUrl1 );
 
         MediaController mediaController = new MediaController(getActivity());
         mediaController.setVisibility(View.GONE);

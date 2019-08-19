@@ -1,7 +1,6 @@
 package vendingmachine.xr.com.coffeemachine.fragment;
 
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -19,11 +18,8 @@ import com.youth.banner.Transformer;
 import com.youth.banner.loader.ImageLoader;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import vendingmachine.xr.com.coffeemachine.R;
-import vendingmachine.xr.com.coffeemachine.activity.FirstActivity;
-import vendingmachine.xr.com.coffeemachine.activity.MainActivity;
 
 
 public class XqFragment extends Fragment {
@@ -55,9 +51,9 @@ public class XqFragment extends Fragment {
         list_path.add(R.mipmap.adbig1);
         list_path.add(R.mipmap.adbig2);
         list_path.add(R.mipmap.adbig3);
-        list_path1.add(R.mipmap.pic1);
-        list_path1.add(R.mipmap.pic2);
-        list_path1.add(R.mipmap.pic4);
+        list_path1.add(R.mipmap.load_pic1);
+        list_path1.add(R.mipmap.load_pic2);
+        list_path1.add(R.mipmap.pic5);
         banner = (Banner)view.findViewById(R.id.banner);
         initView(list_path1);
 

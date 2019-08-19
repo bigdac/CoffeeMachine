@@ -199,7 +199,12 @@ public class BuyFragment extends Fragment {
         preferences = getActivity().getSharedPreferences("my", MODE_PRIVATE);
         szImei = preferences.getString("szImei", "");
         mRecycleView = (RecyclerView) view.findViewById(R.id.grid);
-        mRecycleView.setLayoutManager(new GridLayoutManager(getActivity(), 4));
+        mRecycleView.setLayoutManager(new GridLayoutManager(getActivity(), 4){
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        });
         //获得适配器
         adapter = new MygoodsAdpter(getActivity(), list_goods);
         //设置适配器到组件
@@ -232,7 +237,7 @@ public class BuyFragment extends Fragment {
             public void onClick(View v) {
                 sendBuyMess();
                 if (Utils.isFastClick()) {
-                        showProgressDialog("请稍候。。。。");
+
 //                    ((FirstActivity)getActivity()).stopAD();
                         if (mqService != null) {
                             try {
@@ -245,13 +250,16 @@ public class BuyFragment extends Fragment {
                                 jsonObject.put("price", 0.01);
                                 String s = jsonObject.toString();
                                 Log.e("PPPPPPPPPPPP", "onClick: -->" + s);
-                                boolean success = mqService.publish("coffee/" + szImei + "/deal/create", 2, s);
+                                boolean success = mqService.publish("coffee/" + szImei + "/deal/create", 1, s);
+                                if (success){
+                                    showProgressDialog("请稍候。。。。");
+                                }else {
+                                    Toast.makeText(getActivity(),"网络不可用",Toast.LENGTH_SHORT);
+                                }
                                 Log.i("succ", "-->" + success);
                             } catch (Exception e) {
                                 e.printStackTrace();
                             }
-
-
                         }
 
 
@@ -415,10 +423,10 @@ public class BuyFragment extends Fragment {
         progressDialog.show();
     }
 
-    private static int MSG_DISMISS_DIALOG = 0;
-    private static int QQQ_DISMISS_DIALOG = 1;
-    private static int UI_DISMISS_DIALOG = 2;
-    private static int OUTGOOD_DISMISS_DIALOG = 3;
+    private static int MSG_DISMISS_DIALOG = 0;//解除dialog 开启service线程 后发现不用开关线程也可以操作
+    private static int QQQ_DISMISS_DIALOG = 1;//隐藏dialog
+    private static int UI_DISMISS_DIALOG = 2;//隐藏dialog
+    private static int OUTGOOD_DISMISS_DIALOG = 3;//购买后 自动跳转至购物界面刷新是否有货物
     @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler(){
 
@@ -496,7 +504,7 @@ public class BuyFragment extends Fragment {
 
     };
 
-    /*判断是否有货*/
+    /* 模拟是否有货*/
     String sss;
   /*  public void hasgoods(){
 //        String drinks = FirstActivity.getDrinks();
@@ -544,7 +552,7 @@ public class BuyFragment extends Fragment {
 
 
     }*/
-
+    /*是否有货*/
     public void hasgoods(){
         String drinks = FirstActivity.getDrinks();
 //        String drinks = "FFFFFF";
@@ -561,6 +569,8 @@ public class BuyFragment extends Fragment {
             sss =  s1 +  s2 + s3;
             String z = "";
             Log.e("GGGGGGTTTTT", "hasgoods: -->"+sss+">>>"+sss.length() );
+
+            /*老机器24个货道*/
 //            for (int i = 0;i<sss.length();i++){
 //                if (i<6){
 //                    list_goods.get(4*i).setHasgoods(Integer.valueOf(sss.substring(i,i+1)));
@@ -591,6 +601,7 @@ public class BuyFragment extends Fragment {
 
 
     }
+    /*补齐0 bety有事出现不足8位情况*/
         public static String addZeroForNum(String str,int strLength) {
             int strLen =str.length();
             if (strLen <strLength) {
@@ -613,6 +624,7 @@ public class BuyFragment extends Fragment {
 
     codeDialog codeDialog;
 
+//        二维码界面dialog
     private void payDialog(String aliCode, String wxCode) {
         codeDialog = new codeDialog(getActivity(), aliCode, wxCode);
 
@@ -661,6 +673,7 @@ public class BuyFragment extends Fragment {
             Log.e("DDDDDDDDD", "onReceive: -->"+result );
 
             if (order != null) {
+                /*支付二维码*/
                     int a =0;
                     int b = a;
                     if (order.getResult() !=-1&&progressDialog.isShowing()) {
@@ -671,6 +684,7 @@ public class BuyFragment extends Fragment {
                         payDialog(aliCode, wxCode);
                     }
                 } else if (order.getResult() == -1&&progressDialog.isShowing()){
+                        /*系统错误反-1 */
                     hideProgressDialog();
                     dia = new Dialog(context, R.style.edit_AlertDialog_style);//设置进入时跳出提示框
                     dia.setContentView(R.layout.dialog_buy);
@@ -721,7 +735,7 @@ public class BuyFragment extends Fragment {
 
                 }
             }
-//
+//网络添加货物 现在不用，主要在测试界面人工手动添加
             if (!TextUtils.isEmpty(mess)) {
                 try {
                     JSONObject jsonObjectnew = new JSONObject(mess);
@@ -800,6 +814,7 @@ public class BuyFragment extends Fragment {
         }
     }
     Dialog diaer;
+    /*支付成功出货*/
     private void StartMakedrinks(Context context) {
         diaer = new Dialog(context, R.style.edit_AlertDialog_style);//设置进入时跳出提示框
         diaer.setContentView(R.layout.dialog_buy);
@@ -867,6 +882,7 @@ public class BuyFragment extends Fragment {
 
     }
 
+    /*支付成功后读取机器状态*/
 
     class DownloadThread extends Thread {
         boolean isStop = false;
@@ -936,6 +952,7 @@ public class BuyFragment extends Fragment {
 
     int b1=0;
     int b2 = 0;
+    /*发送购买信息*/
     public void sendBuyMess() {
         b1=0;
         b2=0;
@@ -954,9 +971,7 @@ public class BuyFragment extends Fragment {
         Log.e("strzzz", "sendBuyMess: -->"+temperature1+"...."+ Integer.valueOf(temperature1,16)+"...."+waterHeight+"..."+waterLow );
 
         if (isHexTransport) {
-
             SerialPortUtil.sendHexSerialPort(AryChangeManager.stringToHex(str));
-
         }}
 
     /**
@@ -980,30 +995,30 @@ public class BuyFragment extends Fragment {
     List<goods> newmgoods;
 
     /**
-     * 下部的购买列表
+     * 下部的购买列表 多选的购买列表
      ***/
     public void setAAA(int position) {
-       /* sign = adapter.getSign();
-        mgoods = new ArrayList<>();
-        for (int i = 0; i < sign.length; i++) {
-            if (sign[i] == 1) {
-                mgoods.add(list_goods.get(i));
-            }
-        }
-
-        Log.e("qqqqqSSS", mgoods.size() + "??");
-        for (int i = 0; i < mgoods.size(); i++) {
-            Log.e("qqqqqSSS", mgoods.get(i).getPrice() + "??");
-        }
-
-
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
-        choosecoffeAdapter = new ChoosecoffeAdapter(getActivity(), mgoods);
-        recyclerView.setAdapter(choosecoffeAdapter);*/
+//       sign = adapter.getSign();
+//        mgoods = new ArrayList<>();
+//        for (int i = 0; i < sign.length; i++) {
+//            if (sign[i] == 1) {
+//                mgoods.add(list_goods.get(i));
+//            }
+//        }
+//
+//        Log.e("qqqqqSSS", mgoods.size() + "??");
+//        for (int i = 0; i < mgoods.size(); i++) {
+//            Log.e("qqqqqSSS", mgoods.get(i).getPrice() + "??");
+//        }
+//
+//
+//        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false));
+//        choosecoffeAdapter = new ChoosecoffeAdapter(getActivity(), mgoods);
+//        recyclerView.setAdapter(choosecoffeAdapter);
     }
 
     /**
-     * 设置购买的数量
+     * 设置购买的数量,向newmgoods集合中购买的商品数量
      **/
 
     public void setVal(int position, int val) {
@@ -1113,7 +1128,7 @@ public boolean getCanBuy(){
         }
     }
 
-
+/* 语音播放*/
     public static void textToVoice(Context context, String text) {
         //1.创建SpeechSynthesizer对象, 第一个参数上下文,第二个参数：本地合成时传InitListener
         SpeechSynthesizer mTts = SpeechSynthesizer.createSynthesizer(context, null);

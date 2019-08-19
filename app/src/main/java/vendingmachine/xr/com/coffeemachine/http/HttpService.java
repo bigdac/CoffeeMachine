@@ -6,6 +6,8 @@ import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.HeaderMap;
 import retrofit2.http.Headers;
 import retrofit2.http.Multipart;
 import retrofit2.http.POST;
@@ -21,7 +23,7 @@ public interface HttpService {
 
     @POST
     @Headers({"client:android-xr"})
-    Call<ResponseBody> postQuest(@Url String url, @Body RequestBody body);
+    Call<ResponseBody> postQuest(  @Url String url, @Body RequestBody body);
 
     @Multipart
     @POST("user/{userId}/headImg")

@@ -1,6 +1,8 @@
 package vendingmachine.xr.com.coffeemachine.http;
 
 
+import android.os.Environment;
+
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
 import com.zhy.http.okhttp.OkHttpUtils;
@@ -10,6 +12,7 @@ import org.json.JSONArray;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
@@ -348,6 +351,45 @@ public class HttpUtils {
             e.printStackTrace();
         }
         return result;
+    }
+    public static File
+    downLoadFile(String url){
+        File file=null;
+        try {
+            Request request = new Request.Builder()
+                    .url(url)
+                    .get()
+                    .build();
+
+            OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                    .connectTimeout(3, TimeUnit.SECONDS)//设置连接超时
+                    .readTimeout(5, TimeUnit.SECONDS)//读取超时
+                    .writeTimeout(5, TimeUnit.SECONDS)//写入超时
+                    .addNetworkInterceptor(REWRITE_CACHE_CONTROL_INTERCEPTOR)//添加自定义缓存拦截器（后面讲解），注意这里需要使用.addNetworkInterceptor
+                    .build();
+
+            Response response = okHttpClient.newCall(request).execute();
+            InputStream inputStream=response.body().byteStream();
+
+
+            String path = Environment.getExternalStorageDirectory().getAbsolutePath();
+             file = new File(path,"/kkk.bin");
+
+            if (file.exists()){
+                file.delete();
+            }
+            //把数据存入路径+文件名
+            FileOutputStream fos = new FileOutputStream(file);
+            byte buf[] = new byte[1024];
+            int len = 0;
+            while ((len = inputStream.read(buf)) != -1) {
+                fos.write(buf, 0, len);
+            }
+            fos.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return file;
     }
 
 }

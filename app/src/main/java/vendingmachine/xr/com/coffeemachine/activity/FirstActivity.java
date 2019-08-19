@@ -326,7 +326,7 @@ public class FirstActivity extends AppCompatActivity  {
         FragmentManager fragmentManager1 = getSupportFragmentManager();
         FragmentTransaction transaction1 = fragmentManager1.beginTransaction();
         MediaplayFragment videoFragment = new MediaplayFragment();
-        transaction1.replace(R.id.left_fragment, videoFragment, "leftListFragment");//添加leftListFragment并为其设置tag leftListFragment
+        transaction1.replace(R.id.left_fragment, videoFragment, "leftListFragment2");//添加leftListFragment并为其设置tag leftListFragment
         transaction1.commit();
     }
 

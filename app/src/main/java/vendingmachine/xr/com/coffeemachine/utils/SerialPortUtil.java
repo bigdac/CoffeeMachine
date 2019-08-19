@@ -1,6 +1,7 @@
 package vendingmachine.xr.com.coffeemachine.utils;
 
 import android.content.Context;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
@@ -16,10 +17,10 @@ import java.io.OutputStream;
 import android_serialport_api.SerialPort;
 import vendingmachine.xr.com.coffeemachine.activity.CoffeeTestActivity;
 import vendingmachine.xr.com.coffeemachine.activity.FirstActivity;
-import vendingmachine.xr.com.coffeemachine.activity.MainActivity;
 import vendingmachine.xr.com.coffeemachine.activity.TestActivity;
 import vendingmachine.xr.com.coffeemachine.application.MyApplication;
 import vendingmachine.xr.com.coffeemachine.fragment.BuyFragment;
+import vendingmachine.xr.com.coffeemachine.http.HttpUtils;
 
 /**
  * Created by Norton on 2017/6/6.
@@ -30,10 +31,12 @@ public class SerialPortUtil {
     public static SerialPort serialPort = null;
     public static InputStream inputStream = null;
     public static OutputStream outputStream = null;
-    public static Thread receiveThread = null;
+    public  static Thread receiveThread = null;
     public static int[] values;
     public static String serialData ;
     public static boolean flag = false;
+    private static int updating=0;//设备正在升级中
+    private static long readed=0;//已经读取文件的字节数
 
     /**
      * 打开串口的方法
@@ -82,9 +85,7 @@ public class SerialPortUtil {
      * @param data 要发送的数据
      */
     public static void sendHexSerialPort(int[] data){
-
         MyApplication.sendByte += data.length;
-
         try {
             //将16进制的int类型的数组转换为byte数组
             byte[] buf = AryChangeManager.hexToByte(data);
@@ -100,6 +101,42 @@ public class SerialPortUtil {
             e.printStackTrace();
             Log.i("test","串口数据发送失败");
         } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * 发送升级文件字节 每次发送1024个字节 即1k
+     * @param data
+     */
+    public static void sendUpdate(byte[] data){
+        try {
+            byte[] bytes=new byte[1027];
+            bytes[0]= (byte) 0xA5;
+            int sum=bytes[0];
+            for (int i = 0; i <1024 ; i++) {
+                bytes[i+1]=data[i];
+                sum+=data[i];
+            }
+            bytes[1025]= (byte) (sum%256);
+            bytes[1026]=0x5A;
+            outputStream.write(data);
+            outputStream.flush();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    /**
+     * 请求设备是否需要升级
+     * @param data
+     */
+    public static void questUpdate(byte[] data){
+        try {
+            outputStream.write(data);
+            outputStream.flush();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -167,6 +204,8 @@ public class SerialPortUtil {
     }
 
 
+    static File updateFile;
+    static FileInputStream fis;
     /**
      * 接收串口数据的方法
      */
@@ -206,6 +245,12 @@ public class SerialPortUtil {
 //                        MainActivity.refreshReceive(serialData+" ");
                         serialData = "";
                     }
+                }else if (msg.what==1001){
+                    Toast.makeText(MyApplication.getContext(),"设备升级完成",Toast.LENGTH_SHORT).show();
+                }else if (msg.what==1002){
+                    Toast.makeText(MyApplication.getContext(),"设备不需要升级",Toast.LENGTH_SHORT).show();
+                }else if (msg.what==1003){
+                    Toast.makeText(MyApplication.getContext(),"设备正在忙碌中，请下次升级",Toast.LENGTH_SHORT).show();
                 }
             }
         };
@@ -221,14 +266,62 @@ public class SerialPortUtil {
                             return;
                         }
                         int size = inputStream.read(readData);
-
-                        if (size>0&&flag) {
+                        int first=readData[0]+256;
+                        int last=readData[4];
+                        if (first==0xAB && last==0x0B && 7==readData[1]){//设备需要升级，从服务端获取升级文件，并发送文件的第一帧数据
+                            updateFile=HttpUtils.downLoadFile("http://47.98.131.11/coffe/mcu/kkk.bin");
+                            fis=new FileInputStream(updateFile);
+                            updating=1;
+                            if (updateFile!=null ){
+                                byte[] bytes=new byte[1024];
+                                int len=0;
+                                if ((len=fis.read(bytes))!=-1){
+                                    SerialPortUtil.sendUpdate(bytes);
+                                    readed=len;
+                                }
+                            }
+                        }else if (first==0xAB && last==0x0B && 4==readData[1]){//设备收到数据成功后，由客户端再发送的文件的未读数据，直到文件读取完毕，告诉设备文件已传输完毕
+                            updating=1;
+                            if (updateFile!=null ){
+                                byte[] bytes=new byte[1024];
+                                fis.skip(readed);
+                                int len=0;
+                                if ((len=fis.read(bytes))!=-1){
+                                    SerialPortUtil.sendUpdate(bytes);
+                                    readed+=len;
+                                }
+                                if (len==-1){
+                                    readed=0;
+                                    updating=0;
+                                    byte data[]=new byte[5];
+                                    data[0]= (byte) 0xAA;
+                                    data[1]=4;
+                                    data[2]= 0;
+                                    int sum=0;
+                                    for (int i = 0; i < 3; i++) {
+                                        sum+=data[i];
+                                    }
+                                    data[3]= (byte) (sum%256);
+                                    data[4]=0x0A;
+                                    SerialPortUtil.questUpdate(data);
+                                    if (updateFile!=null && updateFile.exists())
+                                        updateFile.delete();
+                                    if (fis!=null)
+                                        fis.close();
+                                }
+                            }
+                        }else if (first==0xAB && last==0x0B && 3==readData[1]){//设备升级完成
+                            handler.sendEmptyMessage(1001);
+                        } else if (first==0xAB && last==0x0B && 6==readData[1]){//设备不需要升级
+                            handler.sendEmptyMessage(1002);
+                        } else if (first==0xAB && last==0x0B && 5==readData[1]){
+                            handler.sendEmptyMessage(1003);
+                        }else if (size>0&&flag) {
                             if(BuyFragment.isHexReceive){
                                 //当前为16进制接收
                                 values = new int[size];
                                 for (int i = 0; i < values.length; i++) {
                                     values[i] |= (readData[i] & 0x000000ff);
-
                                 }
                             }else{
                                 //当前为文本模式接收
